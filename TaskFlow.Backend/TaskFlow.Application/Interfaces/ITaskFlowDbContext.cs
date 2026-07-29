@@ -14,6 +14,7 @@ public interface ITaskFlowDbContext
     DbSet<SubTask> SubTasks { get; set; }
     DbSet<Comment> Comments { get; set; }
     DbSet<Attachment> Attachments { get; set; }
+    DbSet<Cycle> Cycles { get; set; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

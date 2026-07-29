@@ -6,6 +6,9 @@ import { LoginPage } from "@/components/login-page";
 import { CommandMenu } from "@/components/command-menu";
 import { CreateIssueModal } from "@/components/create-issue-modal";
 import { Sidebar } from "@/components/sidebar";
+import { ProjectsView } from "@/components/projects-view";
+import { ActiveCycleView } from "@/components/active-cycle-view";
+import { MembersView } from "@/components/members-view";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },
@@ -14,7 +17,7 @@ const queryClient = new QueryClient({
 function MainApp() {
   const { user } = useAuth();
   const [cmdOpen, setCmdOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<"board" | "list">("board");
+  const [viewMode, setViewMode] = useState<"board" | "list" | "projects" | "cycle" | "members">("board");
   const [filterMode, setFilterMode] = useState<"all" | "my-issues">("all");
   const [createIssueOpen, setCreateIssueOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -58,9 +61,13 @@ function MainApp() {
         isOpen={sidebarOpen} 
         onToggle={() => setSidebarOpen(false)} 
         onCreateIssue={() => setCreateIssueOpen(true)}
-        activeView={viewMode === "board" ? "board" : "views"}
+        activeView={viewMode}
+        onSetViewMode={setViewMode}
         activeFilter={filterMode}
-        onFilterChange={setFilterMode}
+        onFilterChange={(filter) => {
+          setFilterMode(filter);
+          setViewMode("board"); // Reset to board view when changing inbox/my-issues
+        }}
       />
 
       {/* Main Content */}
@@ -105,15 +112,19 @@ function MainApp() {
           </div>
         </header>
 
-        {/* Board / List Area */}
+        {/* Board / List / Custom Views Area */}
         <main className="flex-1 overflow-hidden relative">
-          {viewMode === "board" ? (
+          {viewMode === "board" && (
             <KanbanBoard viewMode="board" filterMode={filterMode} />
-          ) : (
+          )}
+          {viewMode === "list" && (
             <div className="p-8 text-[#9BA1A6] flex items-center justify-center h-full">
               List view is under construction...
             </div>
           )}
+          {viewMode === "projects" && <ProjectsView />}
+          {viewMode === "cycle" && <ActiveCycleView />}
+          {viewMode === "members" && <MembersView />}
         </main>
       </div>
 

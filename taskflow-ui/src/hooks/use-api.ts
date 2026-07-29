@@ -132,3 +132,35 @@ export function useUploadAttachment() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["issues"] }),
   });
 }
+
+// ─── NEW MODULES (PROJECTS, CYCLES, MEMBERS) ─────────────────────────────────
+
+export function useProjects() {
+  return useQuery<import("@/lib/types").Project[]>({
+    queryKey: ["projects"],
+    queryFn: async () => {
+      const res = await api.get("/api/projects/");
+      return res.data;
+    },
+  });
+}
+
+export function useCycles() {
+  return useQuery<import("@/lib/types").Cycle[]>({
+    queryKey: ["cycles"],
+    queryFn: async () => {
+      const res = await api.get("/api/cycles/");
+      return res.data;
+    },
+  });
+}
+
+export function useMembers() {
+  return useQuery<import("@/lib/types").User[]>({
+    queryKey: ["members"],
+    queryFn: async () => {
+      const res = await api.get("/api/users/");
+      return res.data;
+    },
+  });
+}

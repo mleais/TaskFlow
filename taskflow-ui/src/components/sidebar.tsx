@@ -6,11 +6,12 @@ interface SidebarProps {
   onToggle: () => void;
   onCreateIssue: () => void;
   activeView: string;
+  onSetViewMode: (view: "board" | "list" | "projects" | "cycle" | "members") => void;
   activeFilter?: "all" | "my-issues";
   onFilterChange?: (filter: "all" | "my-issues") => void;
 }
 
-export function Sidebar({ isOpen, onToggle, onCreateIssue, activeView, activeFilter = "all", onFilterChange }: SidebarProps) {
+export function Sidebar({ isOpen, onToggle, onCreateIssue, activeView, onSetViewMode, activeFilter = "all", onFilterChange }: SidebarProps) {
   const { user } = useAuth();
 
   if (!isOpen) return null;
@@ -61,9 +62,9 @@ export function Sidebar({ isOpen, onToggle, onCreateIssue, activeView, activeFil
             <Plus className="w-3 h-3 opacity-0 group-hover:opacity-100" />
           </div>
           <div className="flex flex-col gap-0.5">
-            <NavItem icon={<Zap className="w-3.5 h-3.5" />} label="Active cycle" />
-            <NavItem icon={<FolderKanban className="w-3.5 h-3.5" />} label="Projects" />
-            <NavItem icon={<Users className="w-3.5 h-3.5" />} label="Members" />
+            <NavItem icon={<Zap className="w-3.5 h-3.5" />} label="Active cycle" active={activeView === "cycle"} onClick={() => onSetViewMode("cycle")} />
+            <NavItem icon={<FolderKanban className="w-3.5 h-3.5" />} label="Projects" active={activeView === "projects"} onClick={() => onSetViewMode("projects")} />
+            <NavItem icon={<Users className="w-3.5 h-3.5" />} label="Members" active={activeView === "members"} onClick={() => onSetViewMode("members")} />
           </div>
         </div>
       </div>

@@ -136,6 +136,30 @@ auth.MapPost("/login", async (IMediator mediator, IConfiguration config, [FromBo
     return Results.Ok(new { token = tokenString, fullName = dto.FullName, email = dto.Email, userId = dto.UserId });
 });
 
+// ─── PROJECTS ENDPOINTS ────────────────────────────────────────────────────────
+var projects = app.MapGroup("/api/projects").RequireAuthorization();
+projects.MapGet("/", async (IMediator mediator) =>
+{
+    var result = await mediator.Send(new TaskFlow.Application.Features.Projects.Queries.GetProjectsQuery());
+    return result.IsSuccess ? Results.Ok(result.Value) : Results.BadRequest(new { error = result.ErrorMessage });
+});
+
+// ─── CYCLES ENDPOINTS ──────────────────────────────────────────────────────────
+var cycles = app.MapGroup("/api/cycles").RequireAuthorization();
+cycles.MapGet("/", async (IMediator mediator) =>
+{
+    var result = await mediator.Send(new TaskFlow.Application.Features.Cycles.Queries.GetCyclesQuery());
+    return result.IsSuccess ? Results.Ok(result.Value) : Results.BadRequest(new { error = result.ErrorMessage });
+});
+
+// ─── USERS / MEMBERS ENDPOINTS ───────────────────────────────────────────────
+var usersApi = app.MapGroup("/api/users").RequireAuthorization();
+usersApi.MapGet("/", async (IMediator mediator) =>
+{
+    var result = await mediator.Send(new TaskFlow.Application.Features.Users.Queries.GetMembersQuery());
+    return result.IsSuccess ? Results.Ok(result.Value) : Results.BadRequest(new { error = result.ErrorMessage });
+});
+
 // ─── ISSUES ENDPOINTS ────────────────────────────────────────────────────────
 var issues = app.MapGroup("/api/issues").RequireAuthorization();
 

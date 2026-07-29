@@ -8,6 +8,24 @@ export interface User {
   email: string;
 }
 
+export interface Project {
+  id: string;
+  name: string;
+  projectKey: string;
+  issues: Issue[];
+}
+
+export interface Cycle {
+  id: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+  isActive: boolean;
+  projectId: string;
+  project?: Project;
+  issues: Issue[];
+}
+
 export interface SubTask {
   id: string;
   title: string;

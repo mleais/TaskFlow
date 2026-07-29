@@ -10,4 +10,5 @@ public class Project : BaseEntity
     // Navigation
     public ICollection<UserProject> UserProjects { get; set; } = new List<UserProject>();
     public ICollection<Issue> Issues { get; set; } = new List<Issue>();
+    public ICollection<Cycle> Cycles { get; set; } = new List<Cycle>();
 }

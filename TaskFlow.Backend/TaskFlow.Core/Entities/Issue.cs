@@ -25,6 +25,9 @@ public class Issue : BaseEntity
     public Guid? AssigneeId { get; set; }
     public User? Assignee { get; set; }
 
+    public Guid? CycleId { get; set; }
+    public Cycle? Cycle { get; set; }
+
     public ICollection<Comment> Comments { get; set; } = new List<Comment>();
     public ICollection<SubTask> SubTasks { get; set; } = new List<SubTask>();
     public ICollection<Attachment> Attachments { get; set; } = new List<Attachment>();

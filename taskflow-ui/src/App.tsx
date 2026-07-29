@@ -65,12 +65,12 @@ function MainApp() {
       {/* Main Content */}
       <div className="flex flex-col flex-1 min-w-0">
         {/* Top Header - Breadcrumb */}
-        <header className="h-12 flex items-center justify-between px-4 border-b border-border/20 shrink-0 bg-[#0A0A0B]">
+        <header className="h-12 flex items-center justify-between px-5 border-b border-white/5 shrink-0 bg-[#0A0A0B]">
           <div className="flex items-center gap-3">
             {!sidebarOpen && (
               <button 
                 onClick={() => setSidebarOpen(true)}
-                className="p-1 rounded text-muted-foreground hover:bg-white/5 hover:text-foreground transition-colors"
+                className="p-1 rounded text-[#696C75] hover:bg-white/5 hover:text-[#E8E8ED] transition-colors"
                 title="Open sidebar ([)"
               >
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -80,23 +80,24 @@ function MainApp() {
               </button>
             )}
             
-            <div className="flex items-center text-[13px] font-medium text-muted-foreground">
-              <span className="hover:text-foreground cursor-pointer transition-colors">TaskFlow</span>
-              <span className="mx-2 opacity-50">/</span>
-              <span className="hover:text-foreground cursor-pointer transition-colors">Your Team</span>
-              <span className="mx-2 opacity-50">/</span>
-              <span className="text-foreground">{viewMode === "board" ? "Board" : "List"}</span>
+            <div className="flex items-center text-[13px] font-medium text-[#9BA1A6]">
+              <span className="hover:text-[#E8E8ED] cursor-pointer transition-colors">TaskFlow</span>
+              <span className="mx-2 text-[#27272A]">/</span>
+              <span className="hover:text-[#E8E8ED] cursor-pointer transition-colors">Your Team</span>
+              <span className="mx-2 text-[#27272A]">/</span>
+              <span className="text-[#E8E8ED]">{viewMode === "board" ? "Board" : "List"}</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 p-1 rounded-md bg-white/5 border border-white/10 text-[11px] text-muted-foreground">
-              <button onClick={() => setViewMode("board")} className={`px-2 py-0.5 rounded ${viewMode === "board" ? "bg-white/10 text-foreground" : "hover:text-foreground"}`}>Board</button>
-              <button onClick={() => setViewMode("list")} className={`px-2 py-0.5 rounded ${viewMode === "list" ? "bg-white/10 text-foreground" : "hover:text-foreground"}`}>List</button>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1 p-0.5 rounded-md bg-[#1A1B1E] border border-white/5 text-[12px] font-medium text-[#696C75]">
+              <button onClick={() => setViewMode("board")} className={`px-2.5 py-1 rounded-sm transition-colors ${viewMode === "board" ? "bg-white/10 text-[#E8E8ED] shadow-sm" : "hover:text-[#9BA1A6]"}`}>Board</button>
+              <button onClick={() => setViewMode("list")} className={`px-2.5 py-1 rounded-sm transition-colors ${viewMode === "list" ? "bg-white/10 text-[#E8E8ED] shadow-sm" : "hover:text-[#9BA1A6]"}`}>List</button>
             </div>
+            <div className="w-[1px] h-4 bg-white/10 mx-1"></div>
             <button
               onClick={() => setCmdOpen(true)}
-              className="px-2 py-1.5 rounded-md hover:bg-white/5 transition-colors text-muted-foreground hover:text-foreground flex items-center gap-1.5"
+              className="px-2 py-1 rounded hover:bg-white/5 transition-colors text-[#9BA1A6] hover:text-[#E8E8ED] flex items-center gap-2"
             >
               <span className="text-[12px] font-medium">Display</span>
             </button>

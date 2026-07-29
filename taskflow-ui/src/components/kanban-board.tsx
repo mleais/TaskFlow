@@ -243,25 +243,25 @@ export function KanbanBoard({ viewMode = "board" }: { viewMode?: "board" | "list
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div className="flex h-full w-full gap-4 p-6 overflow-x-auto bg-[#0A0A0B] relative">
+        <div className="flex h-full w-full gap-5 p-6 overflow-x-auto bg-[#0A0A0B] relative scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
           {columns.map((column) => {
             const columnIssues = issues.filter((i) => i.status === column);
             return (
-              <div key={column} className="flex flex-col w-[320px] shrink-0">
-                <div className="flex items-center justify-between mb-3 px-1 group">
+              <div key={column} className="flex flex-col w-[320px] shrink-0 border-r border-white/5 pr-5 last:border-r-0">
+                <div className="flex items-center justify-between mb-4 px-1 group">
                   <div className="flex items-center gap-2">
-                    <h3 className="font-medium text-[13px] text-[#E8E8ED]">{column}</h3>
-                    <span className="text-[12px] text-[#696C75]">
+                    <h3 className="font-semibold text-[11px] uppercase tracking-widest text-[#E8E8ED]">{column}</h3>
+                    <span className="text-[10px] font-mono text-[#696C75] px-1.5 py-0.5 rounded bg-white/5">
                       {columnIssues.length}
                     </span>
                   </div>
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button className="text-[#696C75] hover:text-[#E8E8ED] transition-colors p-1 rounded hover:bg-white/5">
+                    <button className="text-[#696C75] hover:text-[#E8E8ED] transition-colors p-1 rounded hover:bg-white/10">
                       <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M8 3.33331V12.6666M3.33331 7.99998H12.6666" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     </button>
-                    <button className="text-[#696C75] hover:text-[#E8E8ED] transition-colors p-1 rounded hover:bg-white/5">
+                    <button className="text-[#696C75] hover:text-[#E8E8ED] transition-colors p-1 rounded hover:bg-white/10">
                       <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M3.33331 8H12.6666" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                         <path d="M3.33331 4H12.6666" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -276,7 +276,7 @@ export function KanbanBoard({ viewMode = "board" }: { viewMode?: "board" | "list
                   items={columnIssues.map((i) => i.id)}
                   strategy={verticalListSortingStrategy}
                 >
-                  <div className="flex-1 min-h-[120px] pb-8 flex flex-col gap-2">
+                  <div className={`flex-1 min-h-[200px] pb-8 flex flex-col gap-2 rounded-lg transition-colors ${activeId && !columnIssues.length ? 'border border-dashed border-white/10 bg-white/[0.02]' : ''}`}>
                     {columnIssues.map((issue) => (
                       <IssueCard
                         key={issue.id}

@@ -69,6 +69,13 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Veritabanını otomatik olarak oluştur (Render'daki boş DB için)
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<TaskFlow.Infrastructure.Data.TaskFlowDbContext>();
+    db.Database.Migrate();
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

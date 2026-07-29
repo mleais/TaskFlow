@@ -6,7 +6,7 @@ interface CommandMenuProps {
   open: boolean;
   onClose: () => void;
   onCreateIssue?: () => void;
-  onSetViewMode?: (mode: "board" | "list" | "projects" | "cycle" | "members") => void;
+  onSetViewMode?: (mode: "board" | "list" | "projects" | "cycle" | "members" | "views") => void;
 }
 
 const commands = [

@@ -5,21 +5,25 @@ interface SidebarProps {
   isOpen: boolean;
   onToggle: () => void;
   onCreateIssue: () => void;
+  onOpenCommandMenu?: () => void;
   activeView: string;
-  onSetViewMode: (view: "board" | "list" | "projects" | "cycle" | "members") => void;
+  onSetViewMode: (view: "board" | "list" | "projects" | "cycle" | "members" | "views") => void;
   activeFilter?: "all" | "my-issues";
   onFilterChange?: (filter: "all" | "my-issues") => void;
 }
 
-export function Sidebar({ isOpen, onToggle, onCreateIssue, activeView, onSetViewMode, activeFilter = "all", onFilterChange }: SidebarProps) {
-  const { user } = useAuth();
+export function Sidebar({ isOpen, onToggle, onCreateIssue, onOpenCommandMenu, activeView, onSetViewMode, activeFilter = "all", onFilterChange }: SidebarProps) {
+  const { user, logout } = useAuth();
 
   if (!isOpen) return null;
 
   return (
     <div className="w-[240px] shrink-0 h-full bg-[#1A1B1E] border-r border-border/40 flex flex-col text-[#9BA1A6] font-sans transition-all duration-200">
       {/* Workspace Selector */}
-      <div className="h-12 flex items-center justify-between px-3 hover:bg-white/5 transition-colors cursor-pointer group">
+      <div 
+        onClick={() => onOpenCommandMenu?.()}
+        className="h-12 flex items-center justify-between px-3 hover:bg-white/5 transition-colors cursor-pointer group"
+      >
         <div className="flex items-center gap-2">
           <div className="w-5 h-5 rounded-[4px] bg-[#27272A] flex items-center justify-center text-[#E8E8ED] border border-white/10 shadow-[0_0_10px_rgba(255,255,255,0.02)]">
             <Zap className="w-3 h-3 fill-current" />
@@ -52,12 +56,12 @@ export function Sidebar({ isOpen, onToggle, onCreateIssue, activeView, onSetView
         <div className="flex flex-col gap-0.5">
           <NavItem icon={<Inbox className="w-3.5 h-3.5" />} label="Inbox" active={activeFilter === "all"} onClick={() => onFilterChange?.("all")} />
           <NavItem icon={<FileText className="w-3.5 h-3.5" />} label="My Issues" badge="3" active={activeFilter === "my-issues"} onClick={() => onFilterChange?.("my-issues")} />
-          <NavItem icon={<View className="w-3.5 h-3.5" />} label="Views" active={activeView === "views"} />
+          <NavItem icon={<View className="w-3.5 h-3.5" />} label="Views" active={activeView === "views"} onClick={() => onSetViewMode("views")} />
         </div>
 
         {/* Section 2 - Team */}
         <div>
-          <div className="px-2 mb-1 flex items-center justify-between group cursor-pointer">
+          <div className="px-2 mb-1 flex items-center justify-between group cursor-pointer" onClick={() => onSetViewMode("projects")}>
             <span className="text-[11px] font-semibold tracking-wider text-[#696C75]">Your Team</span>
             <Plus className="w-3 h-3 opacity-0 group-hover:opacity-100" />
           </div>
@@ -71,7 +75,11 @@ export function Sidebar({ isOpen, onToggle, onCreateIssue, activeView, onSetView
 
       {/* Footer */}
       <div className="p-3 border-t border-border/20">
-        <div className="flex items-center justify-between px-2 py-1.5 hover:bg-white/5 rounded-md cursor-pointer transition-colors">
+        <div 
+          onClick={() => logout()}
+          className="flex items-center justify-between px-2 py-1.5 hover:bg-white/5 rounded-md cursor-pointer transition-colors"
+          title="Log out"
+        >
           <div className="flex items-center gap-2">
             <div className="w-5 h-5 rounded-full bg-white/10 text-[#E8E8ED] flex items-center justify-center text-[10px] font-bold border border-white/20 shadow-[0_0_8px_rgba(255,255,255,0.05)]">
               {user?.fullName?.[0]}

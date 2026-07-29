@@ -17,7 +17,7 @@ const queryClient = new QueryClient({
 function MainApp() {
   const { user } = useAuth();
   const [cmdOpen, setCmdOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<"board" | "list" | "projects" | "cycle" | "members">("board");
+  const [viewMode, setViewMode] = useState<"board" | "list" | "projects" | "cycle" | "members" | "views">("board");
   const [filterMode, setFilterMode] = useState<"all" | "my-issues">("all");
   const [createIssueOpen, setCreateIssueOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -61,6 +61,7 @@ function MainApp() {
         isOpen={sidebarOpen} 
         onToggle={() => setSidebarOpen(false)} 
         onCreateIssue={() => setCreateIssueOpen(true)}
+        onOpenCommandMenu={() => setCmdOpen(true)}
         activeView={viewMode}
         onSetViewMode={setViewMode}
         activeFilter={filterMode}
@@ -125,6 +126,11 @@ function MainApp() {
           {viewMode === "projects" && <ProjectsView />}
           {viewMode === "cycle" && <ActiveCycleView />}
           {viewMode === "members" && <MembersView />}
+          {viewMode === "views" && (
+            <div className="p-8 text-[#9BA1A6] flex items-center justify-center h-full">
+              Custom views are under construction...
+            </div>
+          )}
         </main>
       </div>
 

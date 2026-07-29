@@ -29,7 +29,7 @@ function PriorityIcon({ priority }: { priority: IssuePriority }) {
   }
 }
 
-function IssueCard({ issue, onClick, onContextMenu }: { issue: Issue; onClick: () => void; onContextMenu: (e: React.MouseEvent) => void }) {
+function IssueCard({ issue, onClick, onContextMenu, onMouseEnter, onMouseLeave }: { issue: Issue; onClick: () => void; onContextMenu: (e: React.MouseEvent) => void; onMouseEnter?: () => void; onMouseLeave?: () => void; }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: issue.id });
 
   const completedSubTasks = issue.subTasks?.filter((s) => s.isCompleted).length ?? 0;
@@ -49,6 +49,9 @@ function IssueCard({ issue, onClick, onContextMenu }: { issue: Issue; onClick: (
       {...listeners}
       onClick={onClick}
       onContextMenu={onContextMenu}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      id={`issue-${issue.id}`}
       className="bg-[#1C1C1E] border border-[#27282b] rounded-md p-3 cursor-pointer hover:border-[#38393d] transition-colors group flex flex-col gap-2"
     >
       <div className="flex items-start justify-between gap-2">
@@ -106,7 +109,8 @@ export function KanbanBoard({ viewMode = "board", filterMode = "all" }: { viewMo
   const updatePriority = useUpdateIssuePriority();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
-  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; issue: Issue } | null>(null);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; issue: Issue; type?: 'priority' | 'status' } | null>(null);
+  const [hoveredIssue, setHoveredIssue] = useState<Issue | null>(null);
   const { user } = useAuth();
 
   const issues = allIssues ? (filterMode === "my-issues" && user ? allIssues.filter(i => i.assignee?.id === user.userId) : allIssues) : [];
@@ -116,6 +120,36 @@ export function KanbanBoard({ viewMode = "board", filterMode = "all" }: { viewMo
     window.addEventListener("click", handleClick);
     return () => window.removeEventListener("click", handleClick);
   }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger if user is typing in an input
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+      if (!hoveredIssue) return;
+
+      if (e.key.toLowerCase() === 'p') {
+        e.preventDefault();
+        // Get the element's bounding box roughly to position the menu
+        const el = document.getElementById(`issue-${hoveredIssue.id}`);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          setContextMenu({ x: rect.left + 20, y: rect.top + 20, issue: hoveredIssue, type: 'priority' });
+        }
+      }
+      
+      if (e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        const el = document.getElementById(`issue-${hoveredIssue.id}`);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          setContextMenu({ x: rect.left + 20, y: rect.top + 20, issue: hoveredIssue, type: 'status' });
+        }
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [hoveredIssue]);
 
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
@@ -171,7 +205,7 @@ export function KanbanBoard({ viewMode = "board", filterMode = "all" }: { viewMo
 
   const handleContextMenu = (e: React.MouseEvent, issue: Issue) => {
     e.preventDefault();
-    setContextMenu({ x: e.clientX, y: e.clientY, issue });
+    setContextMenu({ x: e.clientX, y: e.clientY, issue, type: 'priority' }); // default to priority for right click
   };
 
   if (viewMode === "list") {
@@ -193,6 +227,9 @@ export function KanbanBoard({ viewMode = "board", filterMode = "all" }: { viewMo
                 key={issue.id} 
                 onClick={() => setSelectedIssue(issue)}
                 onContextMenu={(e) => handleContextMenu(e, issue)}
+                onMouseEnter={() => setHoveredIssue(issue)}
+                onMouseLeave={() => setHoveredIssue(null)}
+                id={`issue-${issue.id}`}
                 className="group border-b border-border/20 hover:bg-muted/30 cursor-pointer transition-colors"
               >
                 <td className="py-3 text-[12px] font-mono text-muted-foreground group-hover:text-foreground/80">
@@ -299,6 +336,8 @@ export function KanbanBoard({ viewMode = "board", filterMode = "all" }: { viewMo
                         issue={issue}
                         onClick={() => setSelectedIssue(issue)}
                         onContextMenu={(e) => handleContextMenu(e, issue)}
+                        onMouseEnter={() => setHoveredIssue(issue)}
+                        onMouseLeave={() => setHoveredIssue(null)}
                       />
                     ))}
                   </div>
@@ -336,26 +375,47 @@ export function KanbanBoard({ viewMode = "board", filterMode = "all" }: { viewMo
           className="fixed z-50 bg-card border border-border/50 rounded-lg p-1.5 shadow-xl flex flex-col min-w-[180px] text-[13px]"
           style={{ top: contextMenu.y, left: contextMenu.x }}
         >
-          <div className="px-2 py-1 text-[11px] font-mono text-muted-foreground border-b border-border/50 mb-1">SET PRIORITY</div>
-          {[
-            { level: 4, label: "Urgent", icon: <AlertTriangle className="w-3.5 h-3.5 text-red-500" /> },
-            { level: 3, label: "High", icon: <ArrowUpRight className="w-3.5 h-3.5 text-orange-500" /> },
-            { level: 2, label: "Medium", icon: <ArrowRight className="w-3.5 h-3.5 text-blue-400" /> },
-            { level: 1, label: "Low", icon: <ArrowDownRight className="w-3.5 h-3.5 text-muted-foreground" /> },
-            { level: 0, label: "No Priority", icon: <Circle className="w-3.5 h-3.5 text-muted-foreground/50" /> }
-          ].map(p => (
-            <button 
-              key={p.level}
-              onClick={(e) => {
-                e.stopPropagation();
-                updatePriority.mutate({ issueId: contextMenu.issue.id, priority: p.level });
-                setContextMenu(null);
-              }}
-              className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted text-foreground transition-colors w-full text-left"
-            >
-              {p.icon} {p.label}
-            </button>
-          ))}
+          {contextMenu.type === 'priority' ? (
+            <>
+              <div className="px-2 py-1 text-[11px] font-mono text-muted-foreground border-b border-border/50 mb-1">SET PRIORITY (P)</div>
+              {[
+                { level: 4, label: "Urgent", icon: <AlertTriangle className="w-3.5 h-3.5 text-red-500" /> },
+                { level: 3, label: "High", icon: <ArrowUpRight className="w-3.5 h-3.5 text-orange-500" /> },
+                { level: 2, label: "Medium", icon: <ArrowRight className="w-3.5 h-3.5 text-blue-400" /> },
+                { level: 1, label: "Low", icon: <ArrowDownRight className="w-3.5 h-3.5 text-muted-foreground" /> },
+                { level: 0, label: "No Priority", icon: <Circle className="w-3.5 h-3.5 text-muted-foreground/50" /> }
+              ].map(p => (
+                <button 
+                  key={p.level}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    updatePriority.mutate({ issueId: contextMenu.issue.id, priority: p.level });
+                    setContextMenu(null);
+                  }}
+                  className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted text-foreground transition-colors w-full text-left"
+                >
+                  {p.icon} {p.label}
+                </button>
+              ))}
+            </>
+          ) : (
+            <>
+              <div className="px-2 py-1 text-[11px] font-mono text-muted-foreground border-b border-border/50 mb-1">SET STATUS (S)</div>
+              {columns.map(status => (
+                <button 
+                  key={status}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    updateStatus.mutate({ issueId: contextMenu.issue.id, status: status });
+                    setContextMenu(null);
+                  }}
+                  className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted text-foreground transition-colors w-full text-left"
+                >
+                  {status}
+                </button>
+              ))}
+            </>
+          )}
         </div>
       )}
     </>

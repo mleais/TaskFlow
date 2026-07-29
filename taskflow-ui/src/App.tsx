@@ -11,6 +11,8 @@ import { ActiveCycleView } from "@/components/active-cycle-view";
 import { MembersView } from "@/components/members-view";
 import { SettingsModal } from "@/components/settings-modal";
 import { ListView } from "@/components/list-view";
+import { TriageView } from "@/components/triage-view";
+import { RoadmapView } from "@/components/roadmap-view";
 import { useSignalR } from "@/hooks/use-signalr";
 
 const queryClient = new QueryClient({
@@ -22,7 +24,7 @@ function MainApp() {
   
   const { user } = useAuth();
   const [cmdOpen, setCmdOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<"board" | "list" | "projects" | "cycle" | "members" | "views">("board");
+  const [viewMode, setViewMode] = useState<"board" | "list" | "projects" | "cycle" | "members" | "views" | "triage" | "roadmap">("board");
   const [filterMode, setFilterMode] = useState<"all" | "my-issues">("all");
   const [createIssueOpen, setCreateIssueOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -72,7 +74,7 @@ function MainApp() {
         activeView={viewMode}
         onSetViewMode={(mode) => {
           setViewMode(mode);
-          if (mode === "views" || mode === "projects" || mode === "cycle" || mode === "members") {
+          if (mode === "views" || mode === "projects" || mode === "cycle" || mode === "members" || mode === "triage" || mode === "roadmap") {
             setFilterMode("all");
           }
         }}
@@ -106,7 +108,12 @@ function MainApp() {
               <span className="mx-2 text-[#27272A]">/</span>
               <span className="hover:text-[#E8E8ED] cursor-pointer transition-colors">Your Team</span>
               <span className="mx-2 text-[#27272A]">/</span>
-              <span className="text-[#E8E8ED]">{viewMode === "board" ? "Board" : viewMode === "list" ? "List" : "View"}</span>
+              <span className="text-[#E8E8ED]">
+                {viewMode === "board" ? "Board" : 
+                 viewMode === "list" ? "List" : 
+                 viewMode === "triage" ? "Triage" :
+                 viewMode === "roadmap" ? "Roadmap" : "View"}
+              </span>
             </div>
           </div>
 
@@ -136,6 +143,8 @@ function MainApp() {
           {viewMode === "projects" && <ProjectsView />}
           {viewMode === "cycle" && <ActiveCycleView />}
           {viewMode === "members" && <MembersView />}
+          {viewMode === "triage" && <TriageView />}
+          {viewMode === "roadmap" && <RoadmapView />}
           {viewMode === "views" && (
             <ListView filterMode={filterMode} />
           )}

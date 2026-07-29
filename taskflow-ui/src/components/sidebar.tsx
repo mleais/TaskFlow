@@ -1,4 +1,4 @@
-import { Zap, Inbox, FileText, View, FolderKanban, Settings, Plus, PanelLeftClose, ChevronDown } from "lucide-react";
+import { Zap, Inbox, FileText, View, FolderKanban, Settings, Plus, PanelLeftClose, ChevronDown, CheckCircle2, Map } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { useIssues } from "@/hooks/use-api";
 
@@ -9,7 +9,7 @@ interface SidebarProps {
   onOpenCommandMenu?: () => void;
   onOpenSettings?: () => void;
   activeView: string;
-  onSetViewMode: (view: "board" | "list" | "projects" | "cycle" | "members" | "views") => void;
+  onSetViewMode: (view: "board" | "list" | "projects" | "cycle" | "members" | "views" | "triage" | "roadmap") => void;
   activeFilter?: "all" | "my-issues";
   onFilterChange?: (filter: "all" | "my-issues") => void;
 }
@@ -18,6 +18,7 @@ export function Sidebar({ isOpen, onToggle, onCreateIssue, onOpenCommandMenu, on
   const { user } = useAuth();
   const { data: issues } = useIssues();
   const myIssuesCount = issues?.filter(i => i.assignee?.id === user?.userId).length || 0;
+  const triageCount = issues?.filter(i => i.status === "Backlog").length || 0;
 
   if (!isOpen) return null;
 
@@ -58,9 +59,11 @@ export function Sidebar({ isOpen, onToggle, onCreateIssue, onOpenCommandMenu, on
 
         {/* Section 1 */}
         <div className="flex flex-col gap-0.5">
-          <NavItem icon={<Inbox className="w-3.5 h-3.5" />} label="Inbox" active={activeFilter === "all"} onClick={() => onFilterChange?.("all")} />
+          <NavItem icon={<Inbox className="w-3.5 h-3.5 text-orange-400" />} label="Triage" badge={triageCount > 0 ? triageCount.toString() : undefined} active={activeView === "triage"} onClick={() => onSetViewMode("triage")} />
+          <NavItem icon={<CheckCircle2 className="w-3.5 h-3.5" />} label="Inbox" active={activeFilter === "all" && activeView !== "triage" && activeView !== "roadmap"} onClick={() => onFilterChange?.("all")} />
           <NavItem icon={<FileText className="w-3.5 h-3.5" />} label="My Issues" badge={myIssuesCount > 0 ? myIssuesCount.toString() : undefined} active={activeFilter === "my-issues"} onClick={() => onFilterChange?.("my-issues")} />
           <NavItem icon={<View className="w-3.5 h-3.5" />} label="Views" active={activeView === "views"} onClick={() => onSetViewMode("views")} />
+          <NavItem icon={<Map className="w-3.5 h-3.5 text-indigo-400" />} label="Roadmap" active={activeView === "roadmap"} onClick={() => onSetViewMode("roadmap")} />
         </div>
 
         {/* Section 2 - Team */}

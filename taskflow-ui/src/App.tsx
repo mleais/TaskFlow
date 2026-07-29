@@ -15,9 +15,8 @@ function MainApp() {
   const { user } = useAuth();
   const [cmdOpen, setCmdOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"board" | "list">("board");
-
+  const [filterMode, setFilterMode] = useState<"all" | "my-issues">("all");
   const [createIssueOpen, setCreateIssueOpen] = useState(false);
-
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // CMD+K / CTRL+K, 'v' and 'c' shortcuts
@@ -60,6 +59,8 @@ function MainApp() {
         onToggle={() => setSidebarOpen(false)} 
         onCreateIssue={() => setCreateIssueOpen(true)}
         activeView={viewMode === "board" ? "board" : "views"}
+        activeFilter={filterMode}
+        onFilterChange={setFilterMode}
       />
 
       {/* Main Content */}
@@ -104,9 +105,15 @@ function MainApp() {
           </div>
         </header>
 
-        {/* Board Content */}
+        {/* Board / List Area */}
         <main className="flex-1 overflow-hidden relative">
-          <KanbanBoard viewMode={viewMode} />
+          {viewMode === "board" ? (
+            <KanbanBoard viewMode="board" filterMode={filterMode} />
+          ) : (
+            <div className="p-8 text-[#9BA1A6] flex items-center justify-center h-full">
+              List view is under construction...
+            </div>
+          )}
         </main>
       </div>
 

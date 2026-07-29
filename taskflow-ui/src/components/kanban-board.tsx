@@ -12,6 +12,7 @@ import { SortableContext, verticalListSortingStrategy, useSortable } from "@dnd-
 import { CSS } from "@dnd-kit/utilities";
 import { Loader2, AlertCircle, CheckSquare, MessageSquare, AlertTriangle, ArrowUpRight, ArrowRight, ArrowDownRight, Circle } from "lucide-react";
 import { useIssues, useUpdateIssueStatus, useUpdateIssuePriority } from "@/hooks/use-api";
+import { useAuth } from "@/contexts/auth-context";
 import type { Issue, IssueStatus, IssuePriority } from "@/lib/types";
 import { IssueDetailModal } from "@/components/issue-detail-modal";
 
@@ -98,13 +99,16 @@ function IssueCard({ issue, onClick, onContextMenu }: { issue: Issue; onClick: (
   );
 }
 
-export function KanbanBoard({ viewMode = "board" }: { viewMode?: "board" | "list" }) {
-  const { data: issues, isLoading, isError } = useIssues();
+export function KanbanBoard({ viewMode = "board", filterMode = "all" }: { viewMode?: "board" | "list"; filterMode?: "all" | "my-issues" }) {
+  const { data: allIssues, isLoading, isError } = useIssues();
   const updateStatus = useUpdateIssueStatus();
   const updatePriority = useUpdateIssuePriority();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; issue: Issue } | null>(null);
+  const { user } = useAuth();
+
+  const issues = allIssues ? (filterMode === "my-issues" && user ? allIssues.filter(i => i.assignee?.id === user.userId) : allIssues) : [];
 
   useEffect(() => {
     const handleClick = () => setContextMenu(null);

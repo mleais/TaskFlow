@@ -6,9 +6,11 @@ interface SidebarProps {
   onToggle: () => void;
   onCreateIssue: () => void;
   activeView: string;
+  activeFilter?: "all" | "my-issues";
+  onFilterChange?: (filter: "all" | "my-issues") => void;
 }
 
-export function Sidebar({ isOpen, onToggle, onCreateIssue, activeView }: SidebarProps) {
+export function Sidebar({ isOpen, onToggle, onCreateIssue, activeView, activeFilter = "all", onFilterChange }: SidebarProps) {
   const { user } = useAuth();
 
   if (!isOpen) return null;
@@ -47,8 +49,8 @@ export function Sidebar({ isOpen, onToggle, onCreateIssue, activeView }: Sidebar
 
         {/* Section 1 */}
         <div className="flex flex-col gap-0.5">
-          <NavItem icon={<Inbox className="w-3.5 h-3.5" />} label="Inbox" />
-          <NavItem icon={<FileText className="w-3.5 h-3.5" />} label="My Issues" badge="3" />
+          <NavItem icon={<Inbox className="w-3.5 h-3.5" />} label="Inbox" active={activeFilter === "all"} onClick={() => onFilterChange?.("all")} />
+          <NavItem icon={<FileText className="w-3.5 h-3.5" />} label="My Issues" badge="3" active={activeFilter === "my-issues"} onClick={() => onFilterChange?.("my-issues")} />
           <NavItem icon={<View className="w-3.5 h-3.5" />} label="Views" active={activeView === "views"} />
         </div>
 
@@ -82,9 +84,9 @@ export function Sidebar({ isOpen, onToggle, onCreateIssue, activeView }: Sidebar
   );
 }
 
-function NavItem({ icon, label, badge, active }: { icon: React.ReactNode; label: string; badge?: string; active?: boolean }) {
+function NavItem({ icon, label, badge, active, onClick }: { icon: React.ReactNode; label: string; badge?: string; active?: boolean; onClick?: () => void }) {
   return (
-    <button className={`w-full flex items-center justify-between px-2 py-1.5 rounded-md text-[13px] transition-colors ${active ? "bg-white/10 text-[#E8E8ED]" : "hover:bg-white/5 hover:text-[#E8E8ED]"}`}>
+    <button onClick={onClick} className={`w-full flex items-center justify-between px-2 py-1.5 rounded-md text-[13px] transition-colors ${active ? "bg-white/10 text-[#E8E8ED]" : "hover:bg-white/5 hover:text-[#E8E8ED]"}`}>
       <div className="flex items-center gap-2.5">
         <div className={`flex items-center justify-center w-4 h-4 ${active ? "text-[#E8E8ED]" : "text-[#696C75]"}`}>
           {icon}

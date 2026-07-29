@@ -67,7 +67,12 @@ function MainApp() {
         onOpenCommandMenu={() => setCmdOpen(true)}
         onOpenSettings={() => setSettingsOpen(true)}
         activeView={viewMode}
-        onSetViewMode={setViewMode}
+        onSetViewMode={(mode) => {
+          setViewMode(mode);
+          if (mode === "views" || mode === "projects" || mode === "cycle" || mode === "members") {
+            setFilterMode("all");
+          }
+        }}
         activeFilter={filterMode}
         onFilterChange={(filter) => {
           setFilterMode(filter);

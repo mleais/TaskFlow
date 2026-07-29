@@ -1,5 +1,6 @@
 import { useIssues } from "@/hooks/use-api";
 import { Loader2, AlertCircle, CheckCircle2, Circle } from "lucide-react";
+import { useAuth } from "@/contexts/auth-context";
 
 interface ListViewProps {
   filterMode?: "all" | "my-issues";
@@ -16,11 +17,12 @@ export function ListView({ filterMode = "all" }: ListViewProps) {
     );
   }
 
+  const { user } = useAuth();
+
   // Filter based on filterMode if needed, assuming useIssues fetches all.
   const displayedIssues = (issues || []).filter(issue => {
-    if (filterMode === "my-issues") {
-      // In a real app we'd filter by logged in user ID, but this is a placeholder
-      return issue.assignee !== null;
+    if (filterMode === "my-issues" && user) {
+      return issue.assignee?.id === user.userId;
     }
     return true;
   });

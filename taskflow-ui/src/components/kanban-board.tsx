@@ -140,6 +140,16 @@ export function KanbanBoard({ viewMode = "board", filterMode = "all" }: { viewMo
     );
   }
 
+  if (issues.length === 0 && filterMode === "my-issues") {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-3 text-muted-foreground bg-[#0A0A0B]">
+        <CheckSquare className="w-8 h-8 text-[#696C75]" />
+        <p className="text-sm text-[#9BA1A6]">Size atanmış herhangi bir görev bulunmuyor.</p>
+        <p className="text-xs text-[#696C75]">Oluşturduğunuz yeni görevler varsayılan olarak kimseye atanmaz.</p>
+      </div>
+    );
+  }
+
   const handleDragStart = (event: any) => setActiveId(event.active.id);
 
   const handleDragEnd = async (event: any) => {

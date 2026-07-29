@@ -10,28 +10,22 @@ import {
 } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Loader2, AlertCircle, CheckSquare } from "lucide-react";
+import { Loader2, AlertCircle, CheckSquare, MessageSquare, AlertTriangle, ArrowUpRight, ArrowRight, ArrowDownRight, Circle } from "lucide-react";
 import { useIssues, useUpdateIssueStatus } from "@/hooks/use-api";
-import type { Issue, IssueStatus } from "@/lib/types";
+import type { Issue, IssueStatus, IssuePriority } from "@/lib/types";
 import { IssueDetailModal } from "@/components/issue-detail-modal";
 
 const columns: IssueStatus[] = ["Backlog", "Todo", "In Progress", "In Review", "Done"];
 
-const statusColors: Record<IssueStatus, string> = {
-  Backlog: "text-slate-400",
-  Todo: "text-blue-400",
-  "In Progress": "text-amber-400",
-  "In Review": "text-purple-400",
-  Done: "text-green-400",
-};
-
-const columnDotColors: Record<IssueStatus, string> = {
-  Backlog: "bg-slate-500",
-  Todo: "bg-blue-500",
-  "In Progress": "bg-amber-500",
-  "In Review": "bg-purple-500",
-  Done: "bg-green-500",
-};
+function PriorityIcon({ priority }: { priority: IssuePriority }) {
+  switch (priority) {
+    case 4: return <AlertTriangle className="w-3.5 h-3.5 text-red-500" />;
+    case 3: return <ArrowUpRight className="w-3.5 h-3.5 text-orange-500" />;
+    case 2: return <ArrowRight className="w-3.5 h-3.5 text-blue-400" />;
+    case 1: return <ArrowDownRight className="w-3.5 h-3.5 text-muted-foreground" />;
+    default: return <Circle className="w-3.5 h-3.5 text-muted-foreground/50" />;
+  }
+}
 
 function IssueCard({ issue, onClick }: { issue: Issue; onClick: () => void }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: issue.id });
@@ -52,16 +46,28 @@ function IssueCard({ issue, onClick }: { issue: Issue; onClick: () => void }) {
       {...attributes}
       {...listeners}
       onClick={onClick}
-      className="bg-card border border-border/50 rounded-xl p-3.5 mb-2.5 shadow-sm cursor-pointer hover:border-violet-500/40 hover:shadow-violet-500/5 hover:shadow-lg transition-all group"
+      className="bg-card border border-border/50 rounded-lg p-3 mb-2 shadow-sm cursor-pointer hover:border-border hover:bg-muted/10 hover:-translate-y-[1px] hover:shadow-md transition-all group flex flex-col gap-2"
     >
-      <div className="text-xs font-mono text-muted-foreground mb-1.5">
-        {issue.projectKey}-{issue.issueNumber}
+      <div className="flex items-center justify-between">
+        <div className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider">
+          {issue.projectKey}-{issue.issueNumber}
+        </div>
+        <div className="flex items-center gap-1.5">
+          <PriorityIcon priority={issue.priority ?? 0} />
+          {issue.assignee && (
+            <div className="w-4 h-4 rounded-full bg-primary/20 flex items-center justify-center text-[8px] font-bold text-primary">
+              {issue.assignee.fullName[0]}
+            </div>
+          )}
+        </div>
       </div>
-      <div className="text-sm font-medium leading-snug group-hover:text-foreground transition-colors mb-2">
+      
+      <div className="text-[13px] font-medium leading-snug group-hover:text-foreground text-foreground/90">
         {issue.title}
       </div>
-      {(totalSubTasks > 0 || issue.comments?.length > 0) && (
-        <div className="flex items-center gap-3 text-xs text-muted-foreground mt-2 pt-2 border-t border-border/30">
+
+      {(totalSubTasks > 0 || (issue.comments?.length ?? 0) > 0) && (
+        <div className="flex items-center gap-3 text-[11px] text-muted-foreground mt-1">
           {totalSubTasks > 0 && (
             <span className="flex items-center gap-1">
               <CheckSquare className="w-3 h-3" />
@@ -70,7 +76,8 @@ function IssueCard({ issue, onClick }: { issue: Issue; onClick: () => void }) {
           )}
           {(issue.comments?.length ?? 0) > 0 && (
             <span className="flex items-center gap-1">
-              💬 {issue.comments.length}
+              <MessageSquare className="w-3 h-3" />
+              {issue.comments.length}
             </span>
           )}
         </div>
@@ -93,7 +100,7 @@ export function KanbanBoard() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <Loader2 className="w-8 h-8 animate-spin text-violet-400" />
+        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -134,17 +141,24 @@ export function KanbanBoard() {
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div className="flex h-full w-full gap-4 p-5 overflow-x-auto">
+        <div className="flex h-full w-full gap-4 p-6 overflow-x-auto bg-background/50">
           {columns.map((column) => {
             const columnIssues = issues.filter((i) => i.status === column);
             return (
-              <div key={column} className="flex flex-col w-72 shrink-0">
-                <div className="flex items-center gap-2 mb-3 px-1">
-                  <div className={`w-2 h-2 rounded-full ${columnDotColors[column]}`} />
-                  <h3 className={`font-semibold text-sm ${statusColors[column]}`}>{column}</h3>
-                  <span className="ml-auto text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
-                    {columnIssues.length}
-                  </span>
+              <div key={column} className="flex flex-col w-[280px] shrink-0">
+                <div className="flex items-center justify-between mb-4 px-1">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold text-[12px] uppercase tracking-wider text-foreground/80">{column}</h3>
+                    <span className="text-[11px] font-mono text-muted-foreground">
+                      {columnIssues.length}
+                    </span>
+                  </div>
+                  {/* Plus button for new issue in this column (Visual only for now) */}
+                  <button className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted/50">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M7.99992 2.66663V13.3333M2.66658 7.99996H13.3333" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
                 </div>
 
                 <SortableContext
@@ -152,7 +166,7 @@ export function KanbanBoard() {
                   items={columnIssues.map((i) => i.id)}
                   strategy={verticalListSortingStrategy}
                 >
-                  <div className="flex-1 rounded-xl p-2 min-h-[120px] bg-muted/30 border border-border/20">
+                  <div className="flex-1 min-h-[120px] pb-8">
                     {columnIssues.map((issue) => (
                       <IssueCard
                         key={issue.id}
@@ -169,9 +183,15 @@ export function KanbanBoard() {
 
         <DragOverlay>
           {activeIssue ? (
-            <div className="bg-card border-2 border-violet-500/50 rounded-xl p-3.5 shadow-2xl shadow-violet-500/20 rotate-2 opacity-95 w-72">
-              <div className="text-xs font-mono text-muted-foreground mb-1">{activeIssue.projectKey}-{activeIssue.issueNumber}</div>
-              <div className="text-sm font-medium">{activeIssue.title}</div>
+            <div className="bg-card border border-border/80 rounded-lg p-3 shadow-2xl opacity-90 w-[280px] rotate-2 scale-[1.02] flex flex-col gap-2">
+               <div className="flex items-center justify-between">
+                <div className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider">
+                  {activeIssue.projectKey}-{activeIssue.issueNumber}
+                </div>
+              </div>
+              <div className="text-[13px] font-medium text-foreground/90">
+                {activeIssue.title}
+              </div>
             </div>
           ) : null}
         </DragOverlay>

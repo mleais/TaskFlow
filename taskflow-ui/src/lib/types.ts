@@ -1,5 +1,6 @@
 export type IssueStatus = "Backlog" | "Todo" | "In Progress" | "In Review" | "Done";
 export type IssueType = "Feature" | "Bug" | "Task";
+export type IssuePriority = 0 | 1 | 2 | 3 | 4; // 0: NoPriority, 1: Low, 2: Medium, 3: High, 4: Urgent
 
 export interface User {
   id: string;
@@ -41,6 +42,7 @@ export interface Issue {
   issueNumber: number;
   type: IssueType;
   status: IssueStatus;
+  priority: IssuePriority;
   dueDate?: string;
   estimatedTimeInMinutes: number;
   loggedTimeInMinutes: number;

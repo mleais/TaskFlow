@@ -30,46 +30,54 @@ function MainApp() {
 
   return (
     <div className="flex flex-col h-screen w-full bg-background text-foreground">
-      {/* Sidebar-style topbar */}
-      <header className="border-b border-border/50 bg-card/50 backdrop-blur-sm px-5 py-3 flex items-center gap-4 shrink-0">
-        {/* Logo */}
-        <div className="flex items-center gap-2.5 mr-4">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-blue-600 flex items-center justify-center shadow-sm">
-            <Zap className="w-3.5 h-3.5 text-white" />
+      {/* Minimalist Linear-style topbar */}
+      <header className="border-b border-border/40 bg-background/80 backdrop-blur-md px-4 h-12 flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-4">
+          {/* Logo */}
+          <div className="flex items-center gap-2 text-foreground">
+            <Zap className="w-4 h-4 text-primary" />
+            <span className="font-semibold text-[13px] tracking-wide">TaskFlow</span>
           </div>
-          <span className="font-bold text-sm tracking-tight">TaskFlow</span>
+
+          <div className="w-[1px] h-4 bg-border/50"></div>
+
+          {/* Nav */}
+          <nav className="flex items-center gap-1">
+            <button className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[13px] font-medium bg-muted text-foreground">
+              <Kanban className="w-3.5 h-3.5 opacity-70" />
+              Board
+            </button>
+            <button className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[13px] font-medium text-muted-foreground hover:bg-muted/50 transition-colors">
+              List
+            </button>
+          </nav>
         </div>
 
-        {/* Nav */}
-        <nav className="flex items-center gap-1">
-          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-violet-500/10 text-violet-400">
-            <Kanban className="w-4 h-4" />
-            Kanban
-          </button>
-        </nav>
-
-        {/* CMD+K hint */}
-        <button
-          onClick={() => setCmdOpen(true)}
-          className="ml-auto flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border/50 text-xs text-muted-foreground hover:border-violet-500/50 hover:text-foreground transition-all"
-        >
-          <span>Komutlar</span>
-          <kbd className="bg-muted px-1.5 py-0.5 rounded font-mono text-[10px]">⌘K</kbd>
-        </button>
-
-        {/* User menu */}
-        <div className="flex items-center gap-2 pl-3 border-l border-border/50">
-          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-blue-600 flex items-center justify-center text-xs font-bold text-white">
-            {user.fullName[0]}
-          </div>
-          <span className="text-sm font-medium hidden md:block">{user.fullName}</span>
+        <div className="flex items-center gap-3">
+          {/* CMD+K hint */}
           <button
-            onClick={logout}
-            className="p-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground ml-1"
-            title="Çıkış Yap"
+            onClick={() => setCmdOpen(true)}
+            className="flex items-center gap-2 px-2 py-1 rounded-md border border-border/40 bg-muted/20 text-[11px] text-muted-foreground hover:bg-muted/40 transition-all"
           >
-            <LogOut className="w-4 h-4" />
+            <span>Search</span>
+            <kbd className="font-mono text-[9px] opacity-70">⌘K</kbd>
           </button>
+
+          <div className="w-[1px] h-4 bg-border/50"></div>
+
+          {/* User menu */}
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-[10px] font-bold text-primary">
+              {user.fullName[0]}
+            </div>
+            <button
+              onClick={logout}
+              className="p-1 rounded-md hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+              title="Logout"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
       </header>
 

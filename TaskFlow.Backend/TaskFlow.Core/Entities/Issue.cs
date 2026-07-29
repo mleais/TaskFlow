@@ -31,4 +31,6 @@ public class Issue : BaseEntity
     public ICollection<Comment> Comments { get; set; } = new List<Comment>();
     public ICollection<SubTask> SubTasks { get; set; } = new List<SubTask>();
     public ICollection<Attachment> Attachments { get; set; } = new List<Attachment>();
+    public ICollection<IssueRelation> SourceRelations { get; set; } = new List<IssueRelation>();
+    public ICollection<IssueRelation> TargetRelations { get; set; } = new List<IssueRelation>();
 }

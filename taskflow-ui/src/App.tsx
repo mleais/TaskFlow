@@ -11,12 +11,15 @@ import { ActiveCycleView } from "@/components/active-cycle-view";
 import { MembersView } from "@/components/members-view";
 import { SettingsModal } from "@/components/settings-modal";
 import { ListView } from "@/components/list-view";
+import { useSignalR } from "@/hooks/use-signalr";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },
 });
 
 function MainApp() {
+  useSignalR();
+  
   const { user } = useAuth();
   const [cmdOpen, setCmdOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"board" | "list" | "projects" | "cycle" | "members" | "views">("board");

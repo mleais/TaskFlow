@@ -53,6 +53,17 @@ export interface Attachment {
   createdAt: string;
 }
 
+export type RelationType = 0 | 1 | 2 | 3; // 0: Blocks, 1: BlockedBy, 2: DuplicateOf, 3: RelatesTo
+
+export interface IssueRelation {
+  id: string;
+  sourceIssueId: string;
+  targetIssueId: string;
+  type: RelationType;
+  targetIssue?: Issue; // Navigation property if included
+  sourceIssue?: Issue; // Navigation property if included
+}
+
 export interface Issue {
   id: string;
   title: string;
@@ -69,6 +80,8 @@ export interface Issue {
   subTasks: SubTask[];
   comments: Comment[];
   attachments: Attachment[];
+  sourceRelations?: IssueRelation[];
+  targetRelations?: IssueRelation[];
 }
 
 export interface AuthUser {

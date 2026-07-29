@@ -5,6 +5,4 @@ using System.Collections.Generic;
 
 namespace TaskFlow.Application.Features.Issues.Queries;
 
-public class GetIssuesQuery : IRequest<Result<IEnumerable<Issue>>>
-{
-}
+public record GetIssuesQuery : IRequest<Result<IEnumerable<Issue>>>;

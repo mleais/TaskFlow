@@ -32,6 +32,8 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
 });
 
+builder.Services.AddSignalR();
+
 // Configure MediatR - tüm assemblyleri tara
 builder.Services.AddMediatR(cfg =>
 {
@@ -42,6 +44,7 @@ builder.Services.AddMediatR(cfg =>
 builder.Services.AddDbContext<TaskFlowDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<ITaskFlowDbContext>(provider => provider.GetRequiredService<TaskFlowDbContext>());
+builder.Services.AddScoped<IIssueNotificationService, TaskFlow.Api.Services.SignalRIssueNotificationService>();
 
 // Configure JWT Authentication
 var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key eksik. appsettings.json dosyasını kontrol edin.");
@@ -106,6 +109,9 @@ app.UseStaticFiles(new StaticFileOptions
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// ─── SIGNALR ENDPOINTS ────────────────────────────────────────────────────────
+app.MapHub<TaskFlow.Api.Hubs.TaskFlowHub>("/hubs/taskflow");
 
 // ─── AUTH ENDPOINTS ───────────────────────────────────────────────────────────
 var auth = app.MapGroup("/api/auth");
@@ -244,6 +250,12 @@ issues.MapPost("/{id:guid}/effort", async (IMediator mediator, Guid id, [FromBod
     return result.IsSuccess ? Results.Ok() : Results.BadRequest(new { error = result.ErrorMessage });
 });
 
+issues.MapPost("/{id:guid}/relations", async (IMediator mediator, Guid id, [FromBody] CreateIssueRelationRequest req) =>
+{
+    var result = await mediator.Send(new CreateIssueRelationCommand(id, req.TargetIssueId, (TaskFlow.Core.Entities.RelationType)req.Type));
+    return result.IsSuccess ? Results.Ok(result.Value) : Results.BadRequest(new { error = result.ErrorMessage });
+});
+
 // ─── SUBTASKS ENDPOINTS ──────────────────────────────────────────────────────
 var subtasks = app.MapGroup("/api/subtasks").RequireAuthorization();
 
@@ -301,3 +313,4 @@ public record LogEffortRequest(int MinutesToLog);
 public record UpdateProfileRequest(string FullName);
 public record InviteMemberRequest(string Email);
 record CreateCommentRequest(Guid IssueId, string Text);
+public record CreateIssueRelationRequest(Guid TargetIssueId, int Type);

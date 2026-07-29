@@ -11,6 +11,8 @@ import {
   useCreateComment,
   useUploadAttachment,
   useLogEffort,
+  useCreateRelation,
+  useIssues
 } from "@/hooks/use-api";
 
 interface IssueDetailModalProps {
@@ -30,13 +32,17 @@ export function IssueDetailModal({ issue, onClose }: IssueDetailModalProps) {
   const [newSubTask, setNewSubTask] = useState("");
   const [newComment, setNewComment] = useState("");
   const [effortMinutes, setEffortMinutes] = useState("");
-  const [activeTab, setActiveTab] = useState<"subtasks" | "comments" | "attachments" | "effort">("subtasks");
+  const [activeTab, setActiveTab] = useState<"subtasks" | "comments" | "attachments" | "effort" | "relations">("subtasks");
+  const [relationTargetId, setRelationTargetId] = useState("");
+  const [relationType, setRelationType] = useState<number>(0);
 
+  const { data: allIssues } = useIssues();
   const createSubTask = useCreateSubTask();
   const toggleSubTask = useToggleSubTask();
   const createComment = useCreateComment();
   const uploadAttachment = useUploadAttachment();
   const logEffort = useLogEffort();
+  const createRelation = useCreateRelation();
 
   const completedCount = issue.subTasks?.filter((s) => s.isCompleted).length ?? 0;
   const totalCount = issue.subTasks?.length ?? 0;
@@ -65,6 +71,12 @@ export function IssueDetailModal({ issue, onClose }: IssueDetailModalProps) {
     if (isNaN(min) || min <= 0) return;
     await logEffort.mutateAsync({ issueId: issue.id, minutesToLog: min });
     setEffortMinutes("");
+  };
+
+  const handleCreateRelation = async () => {
+    if (!relationTargetId) return;
+    await createRelation.mutateAsync({ issueId: issue.id, targetIssueId: relationTargetId, type: relationType });
+    setRelationTargetId("");
   };
 
   const formatMinutes = (min: number) => {
@@ -131,12 +143,12 @@ export function IssueDetailModal({ issue, onClose }: IssueDetailModalProps) {
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-white/5 px-6 shrink-0 bg-[#1A1B1E]">
-          {(["subtasks", "comments", "attachments", "effort"] as const).map((tab) => (
+        <div className="flex border-b border-white/5 px-6 shrink-0 bg-[#1A1B1E] overflow-x-auto">
+          {(["subtasks", "comments", "attachments", "effort", "relations"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-3 text-[13px] font-medium border-b-[2px] transition-colors capitalize ${
+              className={`px-4 py-3 text-[13px] font-medium border-b-[2px] transition-colors capitalize whitespace-nowrap ${
                 activeTab === tab
                   ? "border-[#E8E8ED] text-[#E8E8ED]"
                   : "border-transparent text-[#696C75] hover:text-[#9BA1A6]"
@@ -146,6 +158,7 @@ export function IssueDetailModal({ issue, onClose }: IssueDetailModalProps) {
               {tab === "comments" && "Yorumlar"}
               {tab === "attachments" && "Dosyalar"}
               {tab === "effort" && "Efor"}
+              {tab === "relations" && "İlişkiler"}
             </button>
           ))}
         </div>
@@ -327,6 +340,67 @@ export function IssueDetailModal({ issue, onClose }: IssueDetailModalProps) {
                   <Clock className="w-4 h-4" />
                   Kaydet
                 </button>
+              </div>
+            </div>
+          )}
+
+          {/* Relations */}
+          {activeTab === "relations" && (
+            <div>
+              <div className="space-y-3 mb-6">
+                <h3 className="text-sm font-medium text-[#E8E8ED] mb-2">Mevcut İlişkiler</h3>
+                {issue.sourceRelations?.length === 0 && issue.targetRelations?.length === 0 && (
+                  <p className="text-sm text-muted-foreground">Henüz bir ilişki eklenmemiş.</p>
+                )}
+                {issue.sourceRelations?.map(r => (
+                  <div key={r.id} className="flex items-center gap-2 text-sm p-2 bg-white/5 rounded border border-white/10">
+                    <span className="text-violet-400 font-medium">Bu görev</span>
+                    <span className="text-muted-foreground">{r.type === 0 ? "engelliyor" : r.type === 1 ? "tarafından engelleniyor" : r.type === 2 ? "şunun kopyası" : "şununla ilişkili"}</span>
+                    <span className="text-[#E8E8ED] font-mono bg-black/30 px-1.5 rounded">{r.targetIssue?.projectKey}-{r.targetIssue?.issueNumber}</span>
+                  </div>
+                ))}
+                {issue.targetRelations?.map(r => (
+                  <div key={r.id} className="flex items-center gap-2 text-sm p-2 bg-white/5 rounded border border-white/10">
+                    <span className="text-violet-400 font-medium">Bu görev</span>
+                    <span className="text-muted-foreground">{r.type === 0 ? "tarafından engelleniyor" : r.type === 1 ? "engelliyor" : r.type === 2 ? "şunun aslı" : "şununla ilişkili"}</span>
+                    <span className="text-[#E8E8ED] font-mono bg-black/30 px-1.5 rounded">{r.sourceIssue?.projectKey}-{r.sourceIssue?.issueNumber}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="border-t border-white/10 pt-4">
+                <h3 className="text-sm font-medium text-[#E8E8ED] mb-3">Yeni İlişki Ekle</h3>
+                <div className="flex gap-2 items-center">
+                  <select 
+                    value={relationType}
+                    onChange={(e) => setRelationType(Number(e.target.value))}
+                    className="px-3 py-2 text-sm rounded-lg border border-border bg-background/50 focus:outline-none focus:ring-2 focus:ring-violet-500/50 text-[#E8E8ED]"
+                  >
+                    <option value={0}>Engelliyor (Blocks)</option>
+                    <option value={1}>Engelleniyor (Blocked By)</option>
+                    <option value={2}>Kopya (Duplicate Of)</option>
+                    <option value={3}>İlişkili (Relates To)</option>
+                  </select>
+                  
+                  <select
+                    value={relationTargetId}
+                    onChange={(e) => setRelationTargetId(e.target.value)}
+                    className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-background/50 focus:outline-none focus:ring-2 focus:ring-violet-500/50 text-[#E8E8ED]"
+                  >
+                    <option value="">Görev seçin...</option>
+                    {allIssues?.filter(i => i.id !== issue.id).map(i => (
+                      <option key={i.id} value={i.id}>{i.projectKey}-{i.issueNumber}: {i.title}</option>
+                    ))}
+                  </select>
+                  
+                  <button
+                    onClick={handleCreateRelation}
+                    disabled={!relationTargetId || createRelation.isPending}
+                    className="px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium disabled:opacity-50 transition-colors"
+                  >
+                    Ekle
+                  </button>
+                </div>
               </div>
             </div>
           )}

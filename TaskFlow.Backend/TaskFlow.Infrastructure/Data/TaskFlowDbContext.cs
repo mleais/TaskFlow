@@ -18,6 +18,7 @@ public class TaskFlowDbContext : DbContext, ITaskFlowDbContext
     public DbSet<SubTask> SubTasks { get; set; } = null!;
     public DbSet<Attachment> Attachments { get; set; } = null!;
     public DbSet<Cycle> Cycles { get; set; } = null!;
+    public DbSet<IssueRelation> IssueRelations { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -80,5 +81,18 @@ public class TaskFlowDbContext : DbContext, ITaskFlowDbContext
             .HasOne(a => a.Issue)
             .WithMany(i => i.Attachments)
             .HasForeignKey(a => a.IssueId);
+
+        // IssueRelation relationships
+        modelBuilder.Entity<IssueRelation>()
+            .HasOne(r => r.SourceIssue)
+            .WithMany(i => i.SourceRelations)
+            .HasForeignKey(r => r.SourceIssueId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<IssueRelation>()
+            .HasOne(r => r.TargetIssue)
+            .WithMany(i => i.TargetRelations)
+            .HasForeignKey(r => r.TargetIssueId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

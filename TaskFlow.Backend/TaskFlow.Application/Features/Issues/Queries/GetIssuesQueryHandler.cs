@@ -24,8 +24,10 @@ public class GetIssuesQueryHandler : IRequestHandler<GetIssuesQuery, Result<IEnu
             .Include(i => i.Assignee)
             .Include(i => i.Project)
             .Include(i => i.SubTasks)
-            .Include(i => i.Comments)
+            .Include(i => i.Comments).ThenInclude(c => c.User)
             .Include(i => i.Attachments)
+            .Include(i => i.SourceRelations)
+            .Include(i => i.TargetRelations)
             .ToListAsync(cancellationToken);
 
         return Result<IEnumerable<Issue>>.Success(issues);

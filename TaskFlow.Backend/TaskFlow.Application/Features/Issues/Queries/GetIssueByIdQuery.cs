@@ -25,6 +25,8 @@ public class GetIssueByIdQueryHandler : IRequestHandler<GetIssueByIdQuery, Resul
             .Include(i => i.SubTasks)
             .Include(i => i.Comments).ThenInclude(c => c.User)
             .Include(i => i.Attachments)
+            .Include(i => i.SourceRelations)
+            .Include(i => i.TargetRelations)
             .FirstOrDefaultAsync(i => i.Id == request.IssueId, cancellationToken);
 
         if (issue is null)

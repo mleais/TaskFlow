@@ -15,10 +15,12 @@ public record CreateIssueCommand(string Title, string Description, int Priority,
 public class CreateIssueCommandHandler : IRequestHandler<CreateIssueCommand, Result<Issue>>
 {
     private readonly ITaskFlowDbContext _context;
+    private readonly IIssueNotificationService _notificationService;
 
-    public CreateIssueCommandHandler(ITaskFlowDbContext context)
+    public CreateIssueCommandHandler(ITaskFlowDbContext context, IIssueNotificationService notificationService)
     {
         _context = context;
+        _notificationService = notificationService;
     }
 
     public async Task<Result<Issue>> Handle(CreateIssueCommand request, CancellationToken cancellationToken)
@@ -63,6 +65,8 @@ public class CreateIssueCommandHandler : IRequestHandler<CreateIssueCommand, Res
 
         _context.Issues.Add(issue);
         await _context.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.NotifyIssueCreatedAsync(issue.Id, cancellationToken);
 
         return Result<Issue>.Success(issue);
     }

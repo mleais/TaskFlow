@@ -93,6 +93,17 @@ export function useLogEffort() {
   });
 }
 
+export function useCreateRelation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ issueId, targetIssueId, type }: { issueId: string; targetIssueId: string; type: number }) => {
+      const res = await api.post(`/api/issues/${issueId}/relations`, { targetIssueId, type });
+      return res.data;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["issues"] }),
+  });
+}
+
 // ─── SUBTASKS ────────────────────────────────────────────────────────────────
 
 export function useCreateSubTask() {

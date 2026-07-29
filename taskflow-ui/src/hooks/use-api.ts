@@ -42,6 +42,16 @@ export function useUpdateIssueStatus() {
   });
 }
 
+export function useUpdateIssuePriority() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ issueId, priority }: { issueId: string; priority: number }) => {
+      await api.patch(`/api/issues/${issueId}/priority`, { priority });
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["issues"] }),
+  });
+}
+
 export function useLogEffort() {
   const queryClient = useQueryClient();
   return useMutation({

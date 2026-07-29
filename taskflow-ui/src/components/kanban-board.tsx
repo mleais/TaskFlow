@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   DndContext,
   closestCorners,
@@ -11,7 +11,7 @@ import {
 import { SortableContext, verticalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Loader2, AlertCircle, CheckSquare, MessageSquare, AlertTriangle, ArrowUpRight, ArrowRight, ArrowDownRight, Circle } from "lucide-react";
-import { useIssues, useUpdateIssueStatus } from "@/hooks/use-api";
+import { useIssues, useUpdateIssueStatus, useUpdateIssuePriority } from "@/hooks/use-api";
 import type { Issue, IssueStatus, IssuePriority } from "@/lib/types";
 import { IssueDetailModal } from "@/components/issue-detail-modal";
 
@@ -27,7 +27,7 @@ function PriorityIcon({ priority }: { priority: IssuePriority }) {
   }
 }
 
-function IssueCard({ issue, onClick }: { issue: Issue; onClick: () => void }) {
+function IssueCard({ issue, onClick, onContextMenu }: { issue: Issue; onClick: () => void; onContextMenu: (e: React.MouseEvent) => void }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: issue.id });
 
   const completedSubTasks = issue.subTasks?.filter((s) => s.isCompleted).length ?? 0;
@@ -46,6 +46,7 @@ function IssueCard({ issue, onClick }: { issue: Issue; onClick: () => void }) {
       {...attributes}
       {...listeners}
       onClick={onClick}
+      onContextMenu={onContextMenu}
       className="bg-card border border-border/50 rounded-lg p-3 mb-2 shadow-sm cursor-pointer hover:border-border hover:bg-muted/10 hover:-translate-y-[1px] hover:shadow-md transition-all group flex flex-col gap-2"
     >
       <div className="flex items-center justify-between">
@@ -86,11 +87,19 @@ function IssueCard({ issue, onClick }: { issue: Issue; onClick: () => void }) {
   );
 }
 
-export function KanbanBoard() {
+export function KanbanBoard({ viewMode = "board" }: { viewMode?: "board" | "list" }) {
   const { data: issues, isLoading, isError } = useIssues();
   const updateStatus = useUpdateIssueStatus();
+  const updatePriority = useUpdateIssuePriority();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; issue: Issue } | null>(null);
+
+  useEffect(() => {
+    const handleClick = () => setContextMenu(null);
+    window.addEventListener("click", handleClick);
+    return () => window.removeEventListener("click", handleClick);
+  }, []);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -133,6 +142,88 @@ export function KanbanBoard() {
 
   const activeIssue = activeId ? issues.find((i) => i.id === activeId) : null;
 
+  const handleContextMenu = (e: React.MouseEvent, issue: Issue) => {
+    e.preventDefault();
+    setContextMenu({ x: e.clientX, y: e.clientY, issue });
+  };
+
+  if (viewMode === "list") {
+    return (
+      <div className="h-full w-full overflow-y-auto bg-background p-6 relative">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="border-b border-border/40 text-[11px] uppercase tracking-wider text-muted-foreground">
+              <th className="pb-3 font-medium w-32">Identifier</th>
+              <th className="pb-3 font-medium">Title</th>
+              <th className="pb-3 font-medium w-32">Status</th>
+              <th className="pb-3 font-medium w-24">Priority</th>
+              <th className="pb-3 font-medium w-32">Assignee</th>
+            </tr>
+          </thead>
+          <tbody>
+            {issues.map(issue => (
+              <tr 
+                key={issue.id} 
+                onClick={() => setSelectedIssue(issue)}
+                onContextMenu={(e) => handleContextMenu(e, issue)}
+                className="group border-b border-border/20 hover:bg-muted/30 cursor-pointer transition-colors"
+              >
+                <td className="py-3 text-[12px] font-mono text-muted-foreground group-hover:text-foreground/80">
+                  {issue.projectKey}-{issue.issueNumber}
+                </td>
+                <td className="py-3 text-[13px] font-medium text-foreground/90">
+                  {issue.title}
+                </td>
+                <td className="py-3 text-[12px] text-muted-foreground">
+                  <span className="bg-muted px-2 py-0.5 rounded-md border border-border/50">{issue.status}</span>
+                </td>
+                <td className="py-3">
+                  <PriorityIcon priority={issue.priority ?? 0} />
+                </td>
+                <td className="py-3 text-[12px] text-muted-foreground">
+                  {issue.assignee ? issue.assignee.fullName : 'Unassigned'}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {selectedIssue && (
+          <IssueDetailModal
+            issue={selectedIssue}
+            onClose={() => setSelectedIssue(null)}
+          />
+        )}
+        {contextMenu && (
+          <div 
+            className="fixed z-50 bg-card border border-border/50 rounded-lg p-1.5 shadow-xl flex flex-col min-w-[180px] text-sm"
+            style={{ top: contextMenu.y, left: contextMenu.x }}
+          >
+            <div className="px-2 py-1 text-[11px] font-mono text-muted-foreground uppercase border-b border-border/50 mb-1">Set Priority</div>
+            {[
+              { level: 4, label: "Urgent", icon: <AlertTriangle className="w-3.5 h-3.5 text-red-500" /> },
+              { level: 3, label: "High", icon: <ArrowUpRight className="w-3.5 h-3.5 text-orange-500" /> },
+              { level: 2, label: "Medium", icon: <ArrowRight className="w-3.5 h-3.5 text-blue-400" /> },
+              { level: 1, label: "Low", icon: <ArrowDownRight className="w-3.5 h-3.5 text-muted-foreground" /> },
+              { level: 0, label: "No Priority", icon: <Circle className="w-3.5 h-3.5 text-muted-foreground/50" /> }
+            ].map(p => (
+              <button 
+                key={p.level}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  updatePriority.mutate({ issueId: contextMenu.issue.id, priority: p.level });
+                  setContextMenu(null);
+                }}
+                className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted text-foreground transition-colors w-full text-left"
+              >
+                {p.icon} {p.label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <>
       <DndContext
@@ -141,7 +232,7 @@ export function KanbanBoard() {
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div className="flex h-full w-full gap-4 p-6 overflow-x-auto bg-background/50">
+        <div className="flex h-full w-full gap-4 p-6 overflow-x-auto bg-background/50 relative">
           {columns.map((column) => {
             const columnIssues = issues.filter((i) => i.status === column);
             return (
@@ -153,7 +244,6 @@ export function KanbanBoard() {
                       {columnIssues.length}
                     </span>
                   </div>
-                  {/* Plus button for new issue in this column (Visual only for now) */}
                   <button className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted/50">
                     <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M7.99992 2.66663V13.3333M2.66658 7.99996H13.3333" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -172,6 +262,7 @@ export function KanbanBoard() {
                         key={issue.id}
                         issue={issue}
                         onClick={() => setSelectedIssue(issue)}
+                        onContextMenu={(e) => handleContextMenu(e, issue)}
                       />
                     ))}
                   </div>
@@ -202,6 +293,34 @@ export function KanbanBoard() {
           issue={selectedIssue}
           onClose={() => setSelectedIssue(null)}
         />
+      )}
+      
+      {contextMenu && (
+        <div 
+          className="fixed z-50 bg-card border border-border/50 rounded-lg p-1.5 shadow-xl flex flex-col min-w-[180px] text-[13px]"
+          style={{ top: contextMenu.y, left: contextMenu.x }}
+        >
+          <div className="px-2 py-1 text-[11px] font-mono text-muted-foreground uppercase border-b border-border/50 mb-1">Set Priority</div>
+          {[
+            { level: 4, label: "Urgent", icon: <AlertTriangle className="w-3.5 h-3.5 text-red-500" /> },
+            { level: 3, label: "High", icon: <ArrowUpRight className="w-3.5 h-3.5 text-orange-500" /> },
+            { level: 2, label: "Medium", icon: <ArrowRight className="w-3.5 h-3.5 text-blue-400" /> },
+            { level: 1, label: "Low", icon: <ArrowDownRight className="w-3.5 h-3.5 text-muted-foreground" /> },
+            { level: 0, label: "No Priority", icon: <Circle className="w-3.5 h-3.5 text-muted-foreground/50" /> }
+          ].map(p => (
+            <button 
+              key={p.level}
+              onClick={(e) => {
+                e.stopPropagation();
+                updatePriority.mutate({ issueId: contextMenu.issue.id, priority: p.level });
+                setContextMenu(null);
+              }}
+              className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted text-foreground transition-colors w-full text-left"
+            >
+              {p.icon} {p.label}
+            </button>
+          ))}
+        </div>
       )}
     </>
   );

@@ -13,13 +13,22 @@ const queryClient = new QueryClient({
 function MainApp() {
   const { user, logout } = useAuth();
   const [cmdOpen, setCmdOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<"board" | "list">("board");
 
-  // CMD+K / CTRL+K kısayolu
+  // CMD+K / CTRL+K and 'v' shortcut
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
+      // Don't trigger if user is typing in an input
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
         setCmdOpen((o) => !o);
+      }
+      
+      if (e.key === "v" && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault();
+        setViewMode(v => v === "board" ? "list" : "board");
       }
     };
     window.addEventListener("keydown", handler);
@@ -43,17 +52,27 @@ function MainApp() {
 
           {/* Nav */}
           <nav className="flex items-center gap-1">
-            <button className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[13px] font-medium bg-muted text-foreground">
+            <button 
+              onClick={() => setViewMode("board")}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[13px] font-medium transition-colors ${viewMode === "board" ? "bg-muted text-foreground" : "text-muted-foreground hover:bg-muted/50"}`}
+            >
               <Kanban className="w-3.5 h-3.5 opacity-70" />
               Board
             </button>
-            <button className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[13px] font-medium text-muted-foreground hover:bg-muted/50 transition-colors">
+            <button 
+              onClick={() => setViewMode("list")}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[13px] font-medium transition-colors ${viewMode === "list" ? "bg-muted text-foreground" : "text-muted-foreground hover:bg-muted/50"}`}
+            >
               List
             </button>
           </nav>
         </div>
 
         <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 px-2 text-[11px] text-muted-foreground">
+             Press <kbd className="font-mono bg-muted/50 px-1 rounded border border-border/50">v</kbd> to toggle view
+          </div>
+
           {/* CMD+K hint */}
           <button
             onClick={() => setCmdOpen(true)}
@@ -83,7 +102,7 @@ function MainApp() {
 
       {/* Content */}
       <main className="flex-1 overflow-hidden">
-        <KanbanBoard />
+        <KanbanBoard viewMode={viewMode} />
       </main>
 
       {/* CMD+K */}

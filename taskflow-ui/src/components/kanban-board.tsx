@@ -67,13 +67,13 @@ function IssueCard({ issue, onClick, onContextMenu }: { issue: Issue; onClick: (
         {totalSubTasks > 0 && (
           <div className="flex items-center gap-1.5 text-[11px]">
             {completedSubTasks === totalSubTasks ? (
-              <CheckSquare className="w-3.5 h-3.5 text-indigo-400" />
+              <CheckSquare className="w-3.5 h-3.5 text-[#E8E8ED]" />
             ) : (
               <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect x="2.5" y="2.5" width="11" height="11" rx="2.5" stroke="currentColor" strokeWidth="1.5"/>
               </svg>
             )}
-            <span className={completedSubTasks === totalSubTasks ? "text-indigo-400" : ""}>
+            <span className={completedSubTasks === totalSubTasks ? "text-[#E8E8ED]" : ""}>
               {completedSubTasks}/{totalSubTasks}
             </span>
           </div>
@@ -88,7 +88,7 @@ function IssueCard({ issue, onClick, onContextMenu }: { issue: Issue; onClick: (
         
         {issue.assignee && (
           <div className="ml-auto flex items-center gap-1.5">
-            <div className="w-4 h-4 rounded-full bg-indigo-500/20 flex items-center justify-center text-[8px] font-bold text-indigo-400 border border-indigo-500/30">
+            <div className="w-4 h-4 rounded-full bg-white/10 flex items-center justify-center text-[8px] font-bold text-[#E8E8ED] border border-white/20 shadow-[0_0_8px_rgba(255,255,255,0.05)]">
               {issue.assignee.fullName[0]}
             </div>
           </div>

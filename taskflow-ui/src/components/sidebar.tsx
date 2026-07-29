@@ -18,7 +18,7 @@ export function Sidebar({ isOpen, onToggle, onCreateIssue, activeView }: Sidebar
       {/* Workspace Selector */}
       <div className="h-12 flex items-center justify-between px-3 hover:bg-white/5 transition-colors cursor-pointer group">
         <div className="flex items-center gap-2">
-          <div className="w-5 h-5 rounded-[4px] bg-[#5E6AD2] flex items-center justify-center text-white">
+          <div className="w-5 h-5 rounded-[4px] bg-[#27272A] flex items-center justify-center text-[#E8E8ED] border border-white/10 shadow-[0_0_10px_rgba(255,255,255,0.02)]">
             <Zap className="w-3 h-3 fill-current" />
           </div>
           <span className="text-[13px] font-medium text-[#E8E8ED]">TaskFlow</span>
@@ -70,7 +70,7 @@ export function Sidebar({ isOpen, onToggle, onCreateIssue, activeView }: Sidebar
       <div className="p-3 border-t border-border/20">
         <div className="flex items-center justify-between px-2 py-1.5 hover:bg-white/5 rounded-md cursor-pointer transition-colors">
           <div className="flex items-center gap-2">
-            <div className="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-[10px] font-bold border border-indigo-500/30">
+            <div className="w-5 h-5 rounded-full bg-white/10 text-[#E8E8ED] flex items-center justify-center text-[10px] font-bold border border-white/20 shadow-[0_0_8px_rgba(255,255,255,0.05)]">
               {user?.fullName?.[0]}
             </div>
             <span className="text-[13px] font-medium text-[#E8E8ED]">{user?.fullName?.split(' ')[0]}</span>

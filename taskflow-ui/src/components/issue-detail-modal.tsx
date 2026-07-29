@@ -2,6 +2,8 @@ import { useState } from "react";
 import { X, CheckSquare, Square, Plus, Paperclip, Clock, Send, Upload } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { tr } from "date-fns/locale";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import type { Issue } from "@/lib/types";
 import {
   useCreateSubTask,
@@ -11,18 +13,17 @@ import {
   useLogEffort,
 } from "@/hooks/use-api";
 
-
 interface IssueDetailModalProps {
   issue: Issue;
   onClose: () => void;
 }
 
 const statusColors: Record<string, string> = {
-  Backlog: "bg-slate-500/20 text-slate-400",
-  Todo: "bg-blue-500/20 text-blue-400",
-  "In Progress": "bg-amber-500/20 text-amber-400",
-  "In Review": "bg-purple-500/20 text-purple-400",
-  Done: "bg-green-500/20 text-green-400",
+  Backlog: "bg-white/5 text-[#9BA1A6] border border-white/10",
+  Todo: "bg-blue-500/10 text-blue-400 border border-blue-500/20",
+  "In Progress": "bg-amber-500/10 text-amber-400 border border-amber-500/20",
+  "In Review": "bg-purple-500/10 text-purple-400 border border-purple-500/20",
+  Done: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
 };
 
 export function IssueDetailModal({ issue, onClose }: IssueDetailModalProps) {
@@ -78,7 +79,7 @@ export function IssueDetailModal({ issue, onClose }: IssueDetailModalProps) {
   const highlightMentions = (text: string) =>
     text.split(/(@\w+)/g).map((part, i) =>
       part.startsWith("@") ? (
-        <span key={i} className="text-violet-400 font-medium">{part}</span>
+        <span key={i} className="text-[#E8E8ED] font-medium">{part}</span>
       ) : (
         <span key={i}>{part}</span>
       )
@@ -86,42 +87,59 @@ export function IssueDetailModal({ issue, onClose }: IssueDetailModalProps) {
 
   return (
     <div 
-      className="fixed inset-0 z-[100] flex justify-end bg-background/40 backdrop-blur-[2px]"
+      className="fixed inset-0 z-[100] flex justify-end bg-black/60 backdrop-blur-sm transition-all"
       onClick={onClose}
     >
       <div 
-        className="w-full max-w-2xl h-full bg-card border-l border-border/50 shadow-2xl flex flex-col animate-in slide-in-from-right duration-300"
+        className="w-full max-w-2xl h-full bg-[#1A1B1E] border-l border-white/10 shadow-2xl flex flex-col animate-in slide-in-from-right duration-300"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-start gap-4 p-6 border-b border-border/40 bg-muted/10 shrink-0">
+        <div className="flex items-start gap-4 p-6 border-b border-white/10 bg-[#1A1B1E] shrink-0">
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-[12px] font-mono text-muted-foreground uppercase tracking-wider">{issue.projectKey}-{issue.issueNumber}</span>
-              <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${statusColors[issue.status] || "bg-muted text-muted-foreground"}`}>
+            <div className="flex items-center gap-3 mb-3">
+              <span className="text-[12px] font-mono text-[#696C75]">{issue.projectKey}-{issue.issueNumber}</span>
+              <span className={`text-[11px] px-2 py-0.5 rounded-sm font-medium ${statusColors[issue.status] || "bg-white/5 text-[#9BA1A6]"}`}>
                 {issue.status}
               </span>
             </div>
-            <h2 className="text-xl font-semibold leading-snug text-foreground/90">{issue.title}</h2>
+            <h2 className="text-[18px] font-semibold leading-snug text-[#E8E8ED]">{issue.title}</h2>
             {issue.description && (
-              <p className="text-[13px] text-muted-foreground mt-3 font-sans leading-relaxed">{issue.description}</p>
+              <div className="text-[14px] text-[#9BA1A6] mt-4 font-sans leading-relaxed">
+                <ReactMarkdown 
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    p: ({node, ...props}) => <p className="mb-3 last:mb-0" {...props} />,
+                    a: ({node, ...props}) => <a className="text-[#E8E8ED] underline decoration-white/30 hover:decoration-white/80 transition-colors" {...props} />,
+                    // @ts-ignore
+                    code: ({node, inline, ...props}) => inline ? <code className="bg-white/10 px-1.5 py-0.5 rounded text-[#E8E8ED] font-mono text-[12px]" {...props} /> : <pre className="bg-[#0A0A0B] p-4 rounded-md border border-white/10 overflow-x-auto text-[#E8E8ED] my-3 font-mono text-[13px]"><code {...props} /></pre>,
+                    ul: ({node, ...props}) => <ul className="list-disc pl-5 mb-3 space-y-1" {...props} />,
+                    ol: ({node, ...props}) => <ol className="list-decimal pl-5 mb-3 space-y-1" {...props} />,
+                    h1: ({node, ...props}) => <h1 className="text-lg font-semibold text-[#E8E8ED] mt-5 mb-3" {...props} />,
+                    h2: ({node, ...props}) => <h2 className="text-base font-semibold text-[#E8E8ED] mt-4 mb-2" {...props} />,
+                    blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-white/20 pl-4 py-1 my-3 italic text-[#9BA1A6]" {...props} />
+                  }}
+                >
+                  {issue.description}
+                </ReactMarkdown>
+              </div>
             )}
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-md hover:bg-muted transition-colors text-muted-foreground">
-            <X className="w-5 h-5" />
+          <button onClick={onClose} className="p-1.5 rounded hover:bg-white/5 transition-colors text-[#696C75] hover:text-[#E8E8ED]">
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-border/40 px-6 shrink-0 bg-muted/5">
+        <div className="flex border-b border-white/5 px-6 shrink-0 bg-[#1A1B1E]">
           {(["subtasks", "comments", "attachments", "effort"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-3 text-[13px] font-medium border-b-2 transition-colors capitalize ${
+              className={`px-4 py-3 text-[13px] font-medium border-b-[2px] transition-colors capitalize ${
                 activeTab === tab
-                  ? "border-primary text-foreground"
-                  : "border-transparent text-muted-foreground hover:text-foreground/80"
+                  ? "border-[#E8E8ED] text-[#E8E8ED]"
+                  : "border-transparent text-[#696C75] hover:text-[#9BA1A6]"
               }`}
             >
               {tab === "subtasks" && "Alt Görevler"}

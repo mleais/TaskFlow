@@ -1,5 +1,6 @@
 import { Zap, Inbox, FileText, View, FolderKanban, Settings, Plus, PanelLeftClose, ChevronDown } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
+import { useIssues } from "@/hooks/use-api";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -15,6 +16,8 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen, onToggle, onCreateIssue, onOpenCommandMenu, onOpenSettings, activeView, onSetViewMode, activeFilter = "all", onFilterChange }: SidebarProps) {
   const { user } = useAuth();
+  const { data: issues } = useIssues();
+  const myIssuesCount = issues?.filter(i => i.assignee?.id === user?.userId).length || 0;
 
   if (!isOpen) return null;
 
@@ -56,7 +59,7 @@ export function Sidebar({ isOpen, onToggle, onCreateIssue, onOpenCommandMenu, on
         {/* Section 1 */}
         <div className="flex flex-col gap-0.5">
           <NavItem icon={<Inbox className="w-3.5 h-3.5" />} label="Inbox" active={activeFilter === "all"} onClick={() => onFilterChange?.("all")} />
-          <NavItem icon={<FileText className="w-3.5 h-3.5" />} label="My Issues" badge="3" active={activeFilter === "my-issues"} onClick={() => onFilterChange?.("my-issues")} />
+          <NavItem icon={<FileText className="w-3.5 h-3.5" />} label="My Issues" badge={myIssuesCount > 0 ? myIssuesCount.toString() : undefined} active={activeFilter === "my-issues"} onClick={() => onFilterChange?.("my-issues")} />
           <NavItem icon={<View className="w-3.5 h-3.5" />} label="Views" active={activeView === "views"} onClick={() => onSetViewMode("views")} />
         </div>
 

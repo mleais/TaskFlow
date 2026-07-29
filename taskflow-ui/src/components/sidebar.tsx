@@ -68,7 +68,6 @@ export function Sidebar({ isOpen, onToggle, onCreateIssue, onOpenCommandMenu, ac
           <div className="flex flex-col gap-0.5">
             <NavItem icon={<Zap className="w-3.5 h-3.5" />} label="Active cycle" active={activeView === "cycle"} onClick={() => onSetViewMode("cycle")} />
             <NavItem icon={<FolderKanban className="w-3.5 h-3.5" />} label="Projects" active={activeView === "projects"} onClick={() => onSetViewMode("projects")} />
-            <NavItem icon={<Users className="w-3.5 h-3.5" />} label="Members" active={activeView === "members"} onClick={() => onSetViewMode("members")} />
           </div>
         </div>
       </div>

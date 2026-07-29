@@ -74,7 +74,7 @@ export function CreateIssueModal({ onClose }: CreateIssueModalProps) {
 
           <div className="flex items-center gap-4 mt-2 pt-4 border-t border-border/30">
             <div className="flex items-center gap-2">
-              <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Priority</label>
+              <label className="text-[11px] font-medium text-muted-foreground tracking-wider">PRIORITY</label>
               <select
                 value={priority}
                 onChange={(e) => setPriority(Number(e.target.value))}
@@ -89,7 +89,7 @@ export function CreateIssueModal({ onClose }: CreateIssueModalProps) {
             </div>
             
             <div className="flex items-center gap-2">
-              <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Type</label>
+              <label className="text-[11px] font-medium text-muted-foreground tracking-wider">TYPE</label>
               <select
                 value={type}
                 onChange={(e) => setType(e.target.value)}

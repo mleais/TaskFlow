@@ -167,12 +167,12 @@ export function KanbanBoard({ viewMode = "board", filterMode = "all" }: { viewMo
       <div className="h-full w-full overflow-y-auto bg-background p-6 relative">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="border-b border-border/40 text-[11px] uppercase tracking-wider text-muted-foreground">
-              <th className="pb-3 font-medium w-32">Identifier</th>
-              <th className="pb-3 font-medium">Title</th>
-              <th className="pb-3 font-medium w-32">Status</th>
-              <th className="pb-3 font-medium w-24">Priority</th>
-              <th className="pb-3 font-medium w-32">Assignee</th>
+            <tr className="border-b border-border/40 text-[11px] tracking-wider text-muted-foreground">
+              <th className="pb-3 font-medium w-32">IDENTIFIER</th>
+              <th className="pb-3 font-medium">TITLE</th>
+              <th className="pb-3 font-medium w-32">STATUS</th>
+              <th className="pb-3 font-medium w-24">PRIORITY</th>
+              <th className="pb-3 font-medium w-32">ASSIGNEE</th>
             </tr>
           </thead>
           <tbody>
@@ -213,7 +213,7 @@ export function KanbanBoard({ viewMode = "board", filterMode = "all" }: { viewMo
             className="fixed z-50 bg-card border border-border/50 rounded-lg p-1.5 shadow-xl flex flex-col min-w-[180px] text-sm"
             style={{ top: contextMenu.y, left: contextMenu.x }}
           >
-            <div className="px-2 py-1 text-[11px] font-mono text-muted-foreground uppercase border-b border-border/50 mb-1">Set Priority</div>
+            <div className="px-2 py-1 text-[11px] font-mono text-muted-foreground border-b border-border/50 mb-1">SET PRIORITY</div>
             {[
               { level: 4, label: "Urgent", icon: <AlertTriangle className="w-3.5 h-3.5 text-red-500" /> },
               { level: 3, label: "High", icon: <ArrowUpRight className="w-3.5 h-3.5 text-orange-500" /> },
@@ -254,7 +254,7 @@ export function KanbanBoard({ viewMode = "board", filterMode = "all" }: { viewMo
               <div key={column} className="flex flex-col w-[320px] shrink-0 border-r border-white/5 pr-5 last:border-r-0">
                 <div className="flex items-center justify-between mb-4 px-1 group">
                   <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-[11px] uppercase tracking-widest text-[#E8E8ED]">{column}</h3>
+                    <h3 className="font-semibold text-[11px] tracking-widest text-[#E8E8ED]">{column.replace(/i/g, 'I').toUpperCase()}</h3>
                     <span className="text-[10px] font-mono text-[#696C75] px-1.5 py-0.5 rounded bg-white/5">
                       {columnIssues.length}
                     </span>
@@ -324,7 +324,7 @@ export function KanbanBoard({ viewMode = "board", filterMode = "all" }: { viewMo
           className="fixed z-50 bg-card border border-border/50 rounded-lg p-1.5 shadow-xl flex flex-col min-w-[180px] text-[13px]"
           style={{ top: contextMenu.y, left: contextMenu.x }}
         >
-          <div className="px-2 py-1 text-[11px] font-mono text-muted-foreground uppercase border-b border-border/50 mb-1">Set Priority</div>
+          <div className="px-2 py-1 text-[11px] font-mono text-muted-foreground border-b border-border/50 mb-1">SET PRIORITY</div>
           {[
             { level: 4, label: "Urgent", icon: <AlertTriangle className="w-3.5 h-3.5 text-red-500" /> },
             { level: 3, label: "High", icon: <ArrowUpRight className="w-3.5 h-3.5 text-orange-500" /> },

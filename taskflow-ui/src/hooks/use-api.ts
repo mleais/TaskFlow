@@ -25,6 +25,23 @@ export function useIssue(id: string) {
   });
 }
 
+export function useCreateIssue() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ title, description, priority, type }: { title: string; description: string; priority: number; type: string }) => {
+      const res = await api.post("/api/issues/", { 
+        title, 
+        description, 
+        priority, 
+        type, 
+        projectKey: "TSK" // Default project key for now
+      });
+      return res.data;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["issues"] }),
+  });
+}
+
 export function useUpdateIssueStatus() {
   const queryClient = useQueryClient();
   return useMutation({

@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from "@/contexts/auth-context";
 import { KanbanBoard } from "@/components/kanban-board";
 import { LoginPage } from "@/components/login-page";
 import { CommandMenu } from "@/components/command-menu";
+import { CreateIssueModal } from "@/components/create-issue-modal";
 import { Zap, LogOut, Kanban } from "lucide-react";
 
 const queryClient = new QueryClient({
@@ -15,7 +16,9 @@ function MainApp() {
   const [cmdOpen, setCmdOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"board" | "list">("board");
 
-  // CMD+K / CTRL+K and 'v' shortcut
+  const [createIssueOpen, setCreateIssueOpen] = useState(false);
+
+  // CMD+K / CTRL+K, 'v' and 'c' shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       // Don't trigger if user is typing in an input
@@ -29,6 +32,11 @@ function MainApp() {
       if (e.key === "v" && !e.metaKey && !e.ctrlKey) {
         e.preventDefault();
         setViewMode(v => v === "board" ? "list" : "board");
+      }
+
+      if (e.key === "c" && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault();
+        setCreateIssueOpen(true);
       }
     };
     window.addEventListener("keydown", handler);
@@ -69,8 +77,8 @@ function MainApp() {
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-2 text-[11px] text-muted-foreground">
-             Press <kbd className="font-mono bg-muted/50 px-1 rounded border border-border/50">v</kbd> to toggle view
+          <div className="flex items-center gap-2 px-2 text-[11px] text-muted-foreground hidden sm:flex">
+             Press <kbd className="font-mono bg-muted/50 px-1 rounded border border-border/50">C</kbd> to create issue
           </div>
 
           {/* CMD+K hint */}
@@ -106,7 +114,15 @@ function MainApp() {
       </main>
 
       {/* CMD+K */}
-      <CommandMenu open={cmdOpen} onClose={() => setCmdOpen(false)} />
+      <CommandMenu 
+        open={cmdOpen} 
+        onClose={() => setCmdOpen(false)} 
+        onCreateIssue={() => setCreateIssueOpen(true)}
+        onSetViewMode={setViewMode}
+      />
+      
+      {/* Create Issue Modal */}
+      {createIssueOpen && <CreateIssueModal onClose={() => setCreateIssueOpen(false)} />}
     </div>
   );
 }

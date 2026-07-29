@@ -85,37 +85,43 @@ export function IssueDetailModal({ issue, onClose }: IssueDetailModalProps) {
     );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 backdrop-blur-sm p-4 pt-16 overflow-y-auto">
-      <div className="w-full max-w-3xl bg-card border border-border/50 rounded-2xl shadow-2xl">
+    <div 
+      className="fixed inset-0 z-[100] flex justify-end bg-background/40 backdrop-blur-[2px]"
+      onClick={onClose}
+    >
+      <div 
+        className="w-full max-w-2xl h-full bg-card border-l border-border/50 shadow-2xl flex flex-col animate-in slide-in-from-right duration-300"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
-        <div className="flex items-start gap-4 p-6 border-b border-border/50">
+        <div className="flex items-start gap-4 p-6 border-b border-border/40 bg-muted/10 shrink-0">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-xs font-mono text-muted-foreground">{issue.projectKey}-{issue.issueNumber}</span>
-              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColors[issue.status]}`}>
+              <span className="text-[12px] font-mono text-muted-foreground uppercase tracking-wider">{issue.projectKey}-{issue.issueNumber}</span>
+              <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${statusColors[issue.status] || "bg-muted text-muted-foreground"}`}>
                 {issue.status}
               </span>
             </div>
-            <h2 className="text-lg font-semibold leading-snug">{issue.title}</h2>
+            <h2 className="text-xl font-semibold leading-snug text-foreground/90">{issue.title}</h2>
             {issue.description && (
-              <p className="text-sm text-muted-foreground mt-2">{issue.description}</p>
+              <p className="text-[13px] text-muted-foreground mt-3 font-sans leading-relaxed">{issue.description}</p>
             )}
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-muted transition-colors">
-            <X className="w-4 h-4" />
+          <button onClick={onClose} className="p-1.5 rounded-md hover:bg-muted transition-colors text-muted-foreground">
+            <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-border/50 px-6">
+        <div className="flex border-b border-border/40 px-6 shrink-0 bg-muted/5">
           {(["subtasks", "comments", "attachments", "effort"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors capitalize ${
+              className={`px-4 py-3 text-[13px] font-medium border-b-2 transition-colors capitalize ${
                 activeTab === tab
-                  ? "border-violet-500 text-violet-400"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
+                  ? "border-primary text-foreground"
+                  : "border-transparent text-muted-foreground hover:text-foreground/80"
               }`}
             >
               {tab === "subtasks" && "Alt Görevler"}
@@ -127,7 +133,7 @@ export function IssueDetailModal({ issue, onClose }: IssueDetailModalProps) {
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-6 flex-1 overflow-y-auto">
           {/* SubTasks */}
           {activeTab === "subtasks" && (
             <div>

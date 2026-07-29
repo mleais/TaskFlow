@@ -1,0 +1,35 @@
+# Geliştirme ortamı - Git'e ekleme
+.env.local
+.env.*.local
+
+# IDE dosyaları
+.vs/
+.idea/
+*.user
+
+# Build çıktıları
+**/bin/
+**/obj/
+**/dist/
+**/node_modules/
+
+# Loglar
+*.log
+
+# Gizli bilgiler içeren config (GİT'E GİTMEZ!)
+**/appsettings.Development.json
+**/appsettings.Production.json
+
+# Upload klasörü
+**/uploads/
+
+# Docker
+.dockerignore
+
+# SQLite geli�tirme veritaban�
+*.db
+*.db-shm
+*.db-wal
+
+# Yanl�� konuma kurulu shadcn bile�enleri
+taskflow-ui/@/

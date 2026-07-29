@@ -1,4 +1,4 @@
-import { Zap, Inbox, FileText, View, FolderKanban, Users, Settings, Plus, PanelLeftClose, ChevronDown } from "lucide-react";
+import { Zap, Inbox, FileText, View, FolderKanban, Settings, Plus, PanelLeftClose, ChevronDown } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 
 interface SidebarProps {
@@ -6,14 +6,15 @@ interface SidebarProps {
   onToggle: () => void;
   onCreateIssue: () => void;
   onOpenCommandMenu?: () => void;
+  onOpenSettings?: () => void;
   activeView: string;
   onSetViewMode: (view: "board" | "list" | "projects" | "cycle" | "members" | "views") => void;
   activeFilter?: "all" | "my-issues";
   onFilterChange?: (filter: "all" | "my-issues") => void;
 }
 
-export function Sidebar({ isOpen, onToggle, onCreateIssue, onOpenCommandMenu, activeView, onSetViewMode, activeFilter = "all", onFilterChange }: SidebarProps) {
-  const { user, logout } = useAuth();
+export function Sidebar({ isOpen, onToggle, onCreateIssue, onOpenCommandMenu, onOpenSettings, activeView, onSetViewMode, activeFilter = "all", onFilterChange }: SidebarProps) {
+  const { user } = useAuth();
 
   if (!isOpen) return null;
 
@@ -75,9 +76,9 @@ export function Sidebar({ isOpen, onToggle, onCreateIssue, onOpenCommandMenu, ac
       {/* Footer */}
       <div className="p-3 border-t border-border/20">
         <div 
-          onClick={() => logout()}
+          onClick={() => onOpenSettings?.()}
           className="flex items-center justify-between px-2 py-1.5 hover:bg-white/5 rounded-md cursor-pointer transition-colors"
-          title="Log out"
+          title="Settings"
         >
           <div className="flex items-center gap-2">
             <div className="w-5 h-5 rounded-full bg-white/10 text-[#E8E8ED] flex items-center justify-center text-[10px] font-bold border border-white/20 shadow-[0_0_8px_rgba(255,255,255,0.05)]">

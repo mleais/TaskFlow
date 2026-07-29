@@ -9,6 +9,7 @@ import { Sidebar } from "@/components/sidebar";
 import { ProjectsView } from "@/components/projects-view";
 import { ActiveCycleView } from "@/components/active-cycle-view";
 import { MembersView } from "@/components/members-view";
+import { SettingsModal } from "@/components/settings-modal";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },
@@ -20,6 +21,7 @@ function MainApp() {
   const [viewMode, setViewMode] = useState<"board" | "list" | "projects" | "cycle" | "members" | "views">("board");
   const [filterMode, setFilterMode] = useState<"all" | "my-issues">("all");
   const [createIssueOpen, setCreateIssueOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // CMD+K / CTRL+K, 'v' and 'c' shortcuts
@@ -62,6 +64,7 @@ function MainApp() {
         onToggle={() => setSidebarOpen(false)} 
         onCreateIssue={() => setCreateIssueOpen(true)}
         onOpenCommandMenu={() => setCmdOpen(true)}
+        onOpenSettings={() => setSettingsOpen(true)}
         activeView={viewMode}
         onSetViewMode={setViewMode}
         activeFilter={filterMode}
@@ -94,7 +97,7 @@ function MainApp() {
               <span className="mx-2 text-[#27272A]">/</span>
               <span className="hover:text-[#E8E8ED] cursor-pointer transition-colors">Your Team</span>
               <span className="mx-2 text-[#27272A]">/</span>
-              <span className="text-[#E8E8ED]">{viewMode === "board" ? "Board" : "List"}</span>
+              <span className="text-[#E8E8ED]">{viewMode === "board" ? "Board" : viewMode === "list" ? "List" : "View"}</span>
             </div>
           </div>
 
@@ -144,6 +147,9 @@ function MainApp() {
       
       {/* Create Issue Modal */}
       {createIssueOpen && <CreateIssueModal onClose={() => setCreateIssueOpen(false)} />}
+
+      {/* Settings Modal */}
+      {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
     </div>
   );
 }

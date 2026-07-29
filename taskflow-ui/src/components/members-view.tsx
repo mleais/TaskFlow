@@ -1,7 +1,7 @@
 import { useMembers } from "@/hooks/use-api";
 import { Users, Loader2, Mail } from "lucide-react";
 
-export function MembersView() {
+export function MembersView({ isEmbedded }: { isEmbedded?: boolean }) {
   const { data: members, isLoading } = useMembers();
 
   if (isLoading) {
@@ -13,7 +13,7 @@ export function MembersView() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-[#0A0A0B] p-8 overflow-y-auto">
+    <div className={`flex flex-col h-full overflow-y-auto ${isEmbedded ? "p-10" : "bg-[#0A0A0B] p-8"}`}>
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-emerald-500/10 rounded-md">

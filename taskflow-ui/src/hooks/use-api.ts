@@ -4,12 +4,26 @@ import type { Issue, IssueStatus } from "@/lib/types";
 
 // ─── ISSUES ──────────────────────────────────────────────────────────────────
 
+const parseIssue = (issue: any): Issue => {
+  const statusMap: Record<number, IssueStatus> = {
+    0: "Backlog",
+    1: "Todo",
+    2: "In Progress",
+    3: "In Review",
+    4: "Done",
+  };
+  return {
+    ...issue,
+    status: typeof issue.status === "number" ? statusMap[issue.status] || "Todo" : issue.status,
+  };
+};
+
 export function useIssues() {
   return useQuery<Issue[]>({
     queryKey: ["issues"],
     queryFn: async () => {
       const res = await api.get("/api/issues/");
-      return res.data;
+      return res.data.map(parseIssue);
     },
   });
 }
@@ -19,7 +33,7 @@ export function useIssue(id: string) {
     queryKey: ["issues", id],
     queryFn: async () => {
       const res = await api.get(`/api/issues/${id}`);
-      return res.data;
+      return parseIssue(res.data);
     },
     enabled: !!id,
   });

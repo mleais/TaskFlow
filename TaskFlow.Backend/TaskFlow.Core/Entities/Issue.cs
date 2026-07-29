@@ -11,6 +11,7 @@ public class Issue : BaseEntity
     public int IssueNumber { get; set; }
     public IssueType Type { get; set; }
     public IssueStatus Status { get; set; } = IssueStatus.Backlog;
+    public TaskFlow.Core.Enums.Priority Priority { get; set; } = TaskFlow.Core.Enums.Priority.NoPriority;
     public DateTime? DueDate { get; set; }
     
     // Effort Tracking

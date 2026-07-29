@@ -161,7 +161,13 @@ issues.MapPost("/", async (IMediator mediator, [FromBody] CreateIssueCommand com
 
 issues.MapPatch("/{id:guid}/status", async (IMediator mediator, Guid id, [FromBody] UpdateStatusRequest req) =>
 {
-    var result = await mediator.Send(new UpdateIssueStatusCommand(id, req.Status));
+    var result = await mediator.Send(new UpdateIssueStatusCommand(id, (TaskFlow.Core.Entities.IssueStatus)req.Status));
+    return result.IsSuccess ? Results.Ok() : Results.BadRequest(new { error = result.ErrorMessage });
+});
+
+issues.MapPatch("/{id:guid}/priority", async (IMediator mediator, Guid id, [FromBody] UpdatePriorityRequest req) =>
+{
+    var result = await mediator.Send(new UpdateIssuePriorityCommand(id, req.Priority));
     return result.IsSuccess ? Results.Ok() : Results.BadRequest(new { error = result.ErrorMessage });
 });
 
@@ -221,6 +227,8 @@ attachments.MapPost("/", async (IMediator mediator, IWebHostEnvironment env, IFo
 app.Run();
 
 // ─── DTO RECORDS ─────────────────────────────────────────────────────────────
-record UpdateStatusRequest(IssueStatus Status);
-record LogEffortRequest(int MinutesToLog);
+public record LoginRequest(string Email, string Password);
+public record UpdateStatusRequest(int Status);
+public record UpdatePriorityRequest(int Priority);
+public record LogEffortRequest(int MinutesToLog);
 record CreateCommentRequest(Guid IssueId, string Text);

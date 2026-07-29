@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace TaskFlow.Application.Features.Issues.Commands;
 
-public record CreateIssueCommand(string Title, string Description, int Status, string ProjectKey, int IssueNumber) : IRequest<Result<Issue>>;
+public record CreateIssueCommand(string Title, string Description, int Status, int Priority, string ProjectKey, int IssueNumber) : IRequest<Result<Issue>>;
 
 public class CreateIssueCommandHandler : IRequestHandler<CreateIssueCommand, Result<Issue>>
 {
@@ -25,6 +25,7 @@ public class CreateIssueCommandHandler : IRequestHandler<CreateIssueCommand, Res
             Title = request.Title,
             Description = request.Description,
             Status = (IssueStatus)request.Status,
+            Priority = (TaskFlow.Core.Enums.Priority)request.Priority,
             ProjectKey = request.ProjectKey,
             IssueNumber = request.IssueNumber,
             CreatedAt = System.DateTime.UtcNow

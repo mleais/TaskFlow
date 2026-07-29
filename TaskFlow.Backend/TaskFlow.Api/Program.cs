@@ -26,6 +26,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Ignore JSON cycles for Minimal APIs
+builder.Services.ConfigureHttpJsonOptions(options => 
+{
+    options.SerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+});
+
 // Configure MediatR - tüm assemblyleri tara
 builder.Services.AddMediatR(cfg =>
 {
@@ -160,6 +166,43 @@ usersApi.MapGet("/", async (IMediator mediator) =>
     return result.IsSuccess ? Results.Ok(result.Value) : Results.BadRequest(new { error = result.ErrorMessage });
 });
 
+usersApi.MapPut("/me", async (IMediator mediator, HttpContext ctx, [FromBody] UpdateProfileRequest req) =>
+{
+    var userIdClaim = ctx.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    if (userIdClaim == null) return Results.Unauthorized();
+
+    var cmd = new TaskFlow.Application.Features.Users.Commands.UpdateProfileCommand 
+    { 
+        UserId = userIdClaim, 
+        FullName = req.FullName 
+    };
+    var result = await mediator.Send(cmd);
+    return result.IsSuccess ? Results.Ok() : Results.BadRequest(new { error = result.ErrorMessage });
+});
+
+usersApi.MapPost("/me/avatar", async (IMediator mediator, HttpContext ctx, IFormFile file) =>
+{
+    var userIdClaim = ctx.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    if (userIdClaim == null) return Results.Unauthorized();
+
+    using var stream = file.OpenReadStream();
+    var cmd = new TaskFlow.Application.Features.Users.Commands.UploadAvatarCommand 
+    { 
+        UserId = userIdClaim, 
+        FileStream = stream,
+        FileName = file.FileName
+    };
+    var result = await mediator.Send(cmd);
+    return result.IsSuccess ? Results.Ok(new { avatarUrl = result.Value }) : Results.BadRequest(new { error = result.ErrorMessage });
+}).DisableAntiforgery();
+
+usersApi.MapPost("/invite", async (IMediator mediator, [FromBody] InviteMemberRequest req) =>
+{
+    var cmd = new TaskFlow.Application.Features.Users.Commands.InviteMemberCommand { Email = req.Email };
+    var result = await mediator.Send(cmd);
+    return result.IsSuccess ? Results.Ok(new { message = result.Value }) : Results.BadRequest(new { error = result.ErrorMessage });
+});
+
 // ─── ISSUES ENDPOINTS ────────────────────────────────────────────────────────
 var issues = app.MapGroup("/api/issues").RequireAuthorization();
 
@@ -255,4 +298,6 @@ public record LoginRequest(string Email, string Password);
 public record UpdateStatusRequest(int Status);
 public record UpdatePriorityRequest(int Priority);
 public record LogEffortRequest(int MinutesToLog);
+public record UpdateProfileRequest(string FullName);
+public record InviteMemberRequest(string Email);
 record CreateCommentRequest(Guid IssueId, string Text);

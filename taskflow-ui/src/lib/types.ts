@@ -6,6 +6,7 @@ export interface User {
   id: string;
   fullName: string;
   email: string;
+  avatarUrl?: string;
 }
 
 export interface Project {
@@ -75,4 +76,5 @@ export interface AuthUser {
   fullName: string;
   email: string;
   userId: string;
+  avatarUrl?: string;
 }

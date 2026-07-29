@@ -1,8 +1,11 @@
-import { useMembers } from "@/hooks/use-api";
-import { Users, Loader2, Mail } from "lucide-react";
+import { useState } from "react";
+import { useMembers, useInviteMember } from "@/hooks/use-api";
+import { Users, Loader2, Mail, Plus } from "lucide-react";
 
 export function MembersView({ isEmbedded }: { isEmbedded?: boolean }) {
   const { data: members, isLoading } = useMembers();
+  const inviteMember = useInviteMember();
+  const [inviteEmail, setInviteEmail] = useState("");
 
   if (isLoading) {
     return (
@@ -11,6 +14,18 @@ export function MembersView({ isEmbedded }: { isEmbedded?: boolean }) {
       </div>
     );
   }
+
+  const handleInvite = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (inviteEmail) {
+      inviteMember.mutate(inviteEmail, {
+        onSuccess: () => {
+          setInviteEmail("");
+          alert("Invite sent successfully!");
+        }
+      });
+    }
+  };
 
   return (
     <div className={`flex flex-col h-full overflow-y-auto ${isEmbedded ? "p-10" : "bg-[#0A0A0B] p-8"}`}>
@@ -21,9 +36,24 @@ export function MembersView({ isEmbedded }: { isEmbedded?: boolean }) {
           </div>
           <h1 className="text-2xl font-semibold text-[#E8E8ED]">Members</h1>
         </div>
-        <button className="bg-white/10 hover:bg-white/20 text-[#E8E8ED] px-4 py-2 rounded-md text-sm font-medium transition-colors">
-          Invite Member
-        </button>
+        <form onSubmit={handleInvite} className="flex items-center gap-2">
+          <input 
+            type="email" 
+            value={inviteEmail}
+            onChange={(e) => setInviteEmail(e.target.value)}
+            placeholder="Email address"
+            required
+            className="bg-[#1C1C1E] border border-white/10 rounded-md px-3 py-2 text-sm text-[#E8E8ED] focus:outline-none focus:border-emerald-500/50 w-64"
+          />
+          <button 
+            type="submit"
+            disabled={inviteMember.isPending}
+            className="bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
+          >
+            {inviteMember.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+            Invite Member
+          </button>
+        </form>
       </div>
 
       <div className="bg-[#1C1C1E] border border-[#27282b] rounded-lg overflow-hidden">

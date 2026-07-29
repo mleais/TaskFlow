@@ -13,6 +13,11 @@ export function ActiveCycleView() {
   }
 
   const activeCycle = cycles?.find(c => c.isActive) || cycles?.[0];
+  
+  const totalIssues = activeCycle?.issues?.length || 0;
+  // Assuming status "Done"
+  const completedIssues = activeCycle?.issues?.filter(i => i.status === "Done").length || 0;
+  const progress = totalIssues > 0 ? Math.round((completedIssues / totalIssues) * 100) : 0;
 
   return (
     <div className="flex flex-col h-full bg-[#0A0A0B] p-8 overflow-y-auto">
@@ -42,16 +47,16 @@ export function ActiveCycleView() {
           <div className="flex justify-between items-end mb-6">
             <div>
               <h2 className="text-lg font-medium text-[#E8E8ED] mb-1">{activeCycle.name}</h2>
-              <p className="text-sm text-[#9BA1A6]">{activeCycle.issues?.length || 0} issues in this cycle</p>
+              <p className="text-sm text-[#9BA1A6]">{totalIssues} issues in this cycle</p>
             </div>
             <div className="text-right">
-              <div className="text-2xl font-semibold text-[#E8E8ED]">65%</div>
-              <p className="text-xs text-[#696C75]">Completed</p>
+              <div className="text-2xl font-semibold text-[#E8E8ED]">{progress}%</div>
+              <p className="text-xs text-[#696C75]">Completed ({completedIssues}/{totalIssues})</p>
             </div>
           </div>
           
           <div className="w-full h-2 bg-black/40 rounded-full overflow-hidden">
-            <div className="h-full bg-orange-500/80 rounded-full" style={{ width: '65%' }} />
+            <div className="h-full bg-orange-500/80 rounded-full transition-all duration-500" style={{ width: `${progress}%` }} />
           </div>
         </div>
       )}

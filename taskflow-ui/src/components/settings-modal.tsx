@@ -2,6 +2,7 @@ import { useState } from "react";
 import { X, User, Users, Monitor, Building2, LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { MembersView } from "./members-view";
+import { useUpdateProfile, useUploadAvatar } from "@/hooks/use-api";
 
 interface SettingsModalProps {
   onClose: () => void;
@@ -12,6 +13,27 @@ type Tab = "profile" | "preferences" | "workspace" | "members";
 export function SettingsModal({ onClose }: SettingsModalProps) {
   const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>("profile");
+  
+  const updateProfile = useUpdateProfile();
+  const uploadAvatar = useUploadAvatar();
+
+  const handleUpdateProfile = () => {
+    const val = (document.getElementById("fullNameInput") as HTMLInputElement)?.value;
+    if (val && val !== user?.fullName) {
+      updateProfile.mutate(val, {
+        onSuccess: () => alert("Profile updated successfully! Refreshing to see changes might be required if auth context isn't automatically refetched.")
+      });
+    }
+  };
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      uploadAvatar.mutate(file, {
+        onSuccess: () => alert("Avatar uploaded successfully!")
+      });
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 sm:p-8 animate-in fade-in duration-200">
@@ -63,13 +85,18 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
               <h3 className="text-xl font-semibold text-[#E8E8ED] mb-8">Profile Settings</h3>
               
               <div className="flex items-center gap-6 mb-10 pb-10 border-b border-white/5">
-                <div className="w-20 h-20 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 text-2xl font-bold">
-                  {user?.fullName?.[0]}
+                <div className="w-20 h-20 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 text-2xl font-bold overflow-hidden">
+                  {user?.avatarUrl ? (
+                    <img src={`http://localhost:5246${user.avatarUrl}`} alt="Avatar" className="w-full h-full object-cover" />
+                  ) : (
+                    user?.fullName?.[0]
+                  )}
                 </div>
                 <div>
-                  <button className="bg-white/10 hover:bg-white/20 text-[#E8E8ED] px-4 py-2 rounded-md text-sm font-medium transition-colors">
-                    Upload new avatar
-                  </button>
+                  <label className="bg-white/10 hover:bg-white/20 text-[#E8E8ED] px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer">
+                    {uploadAvatar.isPending ? "Uploading..." : "Upload new avatar"}
+                    <input type="file" className="hidden" accept="image/*" onChange={handleAvatarChange} disabled={uploadAvatar.isPending} />
+                  </label>
                   <p className="text-xs text-[#696C75] mt-2">JPG, GIF or PNG. 1MB max.</p>
                 </div>
               </div>
@@ -77,15 +104,19 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-[#9BA1A6] mb-2">Full Name</label>
-                  <input type="text" defaultValue={user?.fullName} className="w-full bg-[#1C1C1E] border border-white/10 rounded-md px-3 py-2 text-[#E8E8ED] focus:outline-none focus:border-indigo-500/50" />
+                  <input id="fullNameInput" type="text" defaultValue={user?.fullName} className="w-full bg-[#1C1C1E] border border-white/10 rounded-md px-3 py-2 text-[#E8E8ED] focus:outline-none focus:border-indigo-500/50" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-[#9BA1A6] mb-2">Email Address</label>
                   <input type="email" defaultValue={user?.email} className="w-full bg-[#1C1C1E] border border-white/10 rounded-md px-3 py-2 text-[#E8E8ED] focus:outline-none focus:border-indigo-500/50" readOnly />
                 </div>
                 <div className="pt-4">
-                  <button className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
-                    Save Changes
+                  <button 
+                    onClick={handleUpdateProfile}
+                    disabled={updateProfile.isPending}
+                    className="bg-indigo-500 hover:bg-indigo-600 disabled:opacity-50 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                  >
+                    {updateProfile.isPending ? "Saving..." : "Save Changes"}
                   </button>
                 </div>
               </div>

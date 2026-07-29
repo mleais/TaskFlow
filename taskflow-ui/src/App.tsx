@@ -10,6 +10,7 @@ import { ProjectsView } from "@/components/projects-view";
 import { ActiveCycleView } from "@/components/active-cycle-view";
 import { MembersView } from "@/components/members-view";
 import { SettingsModal } from "@/components/settings-modal";
+import { ListView } from "@/components/list-view";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },
@@ -122,17 +123,13 @@ function MainApp() {
             <KanbanBoard viewMode="board" filterMode={filterMode} />
           )}
           {viewMode === "list" && (
-            <div className="p-8 text-[#9BA1A6] flex items-center justify-center h-full">
-              List view is under construction...
-            </div>
+            <ListView filterMode={filterMode} />
           )}
           {viewMode === "projects" && <ProjectsView />}
           {viewMode === "cycle" && <ActiveCycleView />}
           {viewMode === "members" && <MembersView />}
           {viewMode === "views" && (
-            <div className="p-8 text-[#9BA1A6] flex items-center justify-center h-full">
-              Custom views are under construction...
-            </div>
+            <ListView filterMode={filterMode} />
           )}
         </main>
       </div>

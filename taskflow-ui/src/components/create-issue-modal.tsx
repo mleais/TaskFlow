@@ -33,8 +33,13 @@ export function CreateIssueModal({ onClose }: CreateIssueModalProps) {
     e.preventDefault();
     if (!title.trim()) return;
     
-    await createIssue.mutateAsync({ title, description, priority, type });
-    onClose();
+    try {
+      await createIssue.mutateAsync({ title, description, priority, type });
+      onClose();
+    } catch (error) {
+      console.error("Failed to create issue:", error);
+      alert("Failed to create issue. Please check the console for details.");
+    }
   };
 
   return (

@@ -47,42 +47,53 @@ function IssueCard({ issue, onClick, onContextMenu }: { issue: Issue; onClick: (
       {...listeners}
       onClick={onClick}
       onContextMenu={onContextMenu}
-      className="bg-card border border-border/50 rounded-lg p-3 mb-2 shadow-sm cursor-pointer hover:border-border hover:bg-muted/10 hover:-translate-y-[1px] hover:shadow-md transition-all group flex flex-col gap-2"
+      className="bg-[#1C1C1E] border border-[#27282b] rounded-md p-3 cursor-pointer hover:border-[#38393d] transition-colors group flex flex-col gap-2"
     >
-      <div className="flex items-center justify-between">
-        <div className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider">
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex items-start gap-2">
+          <div className="mt-0.5">
+            <PriorityIcon priority={issue.priority ?? 0} />
+          </div>
+          <div className="text-[13px] font-medium text-[#E8E8ED] leading-snug">
+            {issue.title}
+          </div>
+        </div>
+        <div className="text-[11px] font-mono text-[#696C75] shrink-0 pt-0.5 group-hover:text-[#9BA1A6] transition-colors">
           {issue.projectKey}-{issue.issueNumber}
         </div>
-        <div className="flex items-center gap-1.5">
-          <PriorityIcon priority={issue.priority ?? 0} />
-          {issue.assignee && (
-            <div className="w-4 h-4 rounded-full bg-primary/20 flex items-center justify-center text-[8px] font-bold text-primary">
-              {issue.assignee.fullName[0]}
-            </div>
-          )}
-        </div>
-      </div>
-      
-      <div className="text-[13px] font-medium leading-snug group-hover:text-foreground text-foreground/90">
-        {issue.title}
       </div>
 
-      {(totalSubTasks > 0 || (issue.comments?.length ?? 0) > 0) && (
-        <div className="flex items-center gap-3 text-[11px] text-muted-foreground mt-1">
-          {totalSubTasks > 0 && (
-            <span className="flex items-center gap-1">
-              <CheckSquare className="w-3 h-3" />
+      <div className="flex items-center gap-3 mt-1 text-[#696C75]">
+        {totalSubTasks > 0 && (
+          <div className="flex items-center gap-1.5 text-[11px]">
+            {completedSubTasks === totalSubTasks ? (
+              <CheckSquare className="w-3.5 h-3.5 text-indigo-400" />
+            ) : (
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="2.5" y="2.5" width="11" height="11" rx="2.5" stroke="currentColor" strokeWidth="1.5"/>
+              </svg>
+            )}
+            <span className={completedSubTasks === totalSubTasks ? "text-indigo-400" : ""}>
               {completedSubTasks}/{totalSubTasks}
             </span>
-          )}
-          {(issue.comments?.length ?? 0) > 0 && (
-            <span className="flex items-center gap-1">
-              <MessageSquare className="w-3 h-3" />
-              {issue.comments.length}
-            </span>
-          )}
-        </div>
-      )}
+          </div>
+        )}
+        
+        {(issue.comments?.length ?? 0) > 0 && (
+          <div className="flex items-center gap-1 text-[11px]">
+            <MessageSquare className="w-3 h-3" />
+            <span>{issue.comments.length}</span>
+          </div>
+        )}
+        
+        {issue.assignee && (
+          <div className="ml-auto flex items-center gap-1.5">
+            <div className="w-4 h-4 rounded-full bg-indigo-500/20 flex items-center justify-center text-[8px] font-bold text-indigo-400 border border-indigo-500/30">
+              {issue.assignee.fullName[0]}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -232,23 +243,32 @@ export function KanbanBoard({ viewMode = "board" }: { viewMode?: "board" | "list
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div className="flex h-full w-full gap-4 p-6 overflow-x-auto bg-background/50 relative">
+        <div className="flex h-full w-full gap-4 p-6 overflow-x-auto bg-[#0A0A0B] relative">
           {columns.map((column) => {
             const columnIssues = issues.filter((i) => i.status === column);
             return (
-              <div key={column} className="flex flex-col w-[280px] shrink-0">
-                <div className="flex items-center justify-between mb-4 px-1">
+              <div key={column} className="flex flex-col w-[320px] shrink-0">
+                <div className="flex items-center justify-between mb-3 px-1 group">
                   <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-[12px] uppercase tracking-wider text-foreground/80">{column}</h3>
-                    <span className="text-[11px] font-mono text-muted-foreground">
+                    <h3 className="font-medium text-[13px] text-[#E8E8ED]">{column}</h3>
+                    <span className="text-[12px] text-[#696C75]">
                       {columnIssues.length}
                     </span>
                   </div>
-                  <button className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted/50">
-                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M7.99992 2.66663V13.3333M2.66658 7.99996H13.3333" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </button>
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button className="text-[#696C75] hover:text-[#E8E8ED] transition-colors p-1 rounded hover:bg-white/5">
+                      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8 3.33331V12.6666M3.33331 7.99998H12.6666" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </button>
+                    <button className="text-[#696C75] hover:text-[#E8E8ED] transition-colors p-1 rounded hover:bg-white/5">
+                      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3.33331 8H12.6666" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M3.33331 4H12.6666" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M3.33331 12H12.6666" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </button>
+                  </div>
                 </div>
 
                 <SortableContext
@@ -256,7 +276,7 @@ export function KanbanBoard({ viewMode = "board" }: { viewMode?: "board" | "list
                   items={columnIssues.map((i) => i.id)}
                   strategy={verticalListSortingStrategy}
                 >
-                  <div className="flex-1 min-h-[120px] pb-8">
+                  <div className="flex-1 min-h-[120px] pb-8 flex flex-col gap-2">
                     {columnIssues.map((issue) => (
                       <IssueCard
                         key={issue.id}
@@ -274,13 +294,13 @@ export function KanbanBoard({ viewMode = "board" }: { viewMode?: "board" | "list
 
         <DragOverlay>
           {activeIssue ? (
-            <div className="bg-card border border-border/80 rounded-lg p-3 shadow-2xl opacity-90 w-[280px] rotate-2 scale-[1.02] flex flex-col gap-2">
+            <div className="bg-[#1C1C1E] border border-white/10 rounded-md p-3 shadow-2xl opacity-90 w-[320px] rotate-2 scale-[1.02] flex flex-col gap-2">
                <div className="flex items-center justify-between">
-                <div className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider">
+                <div className="text-[12px] font-mono text-[#696C75]">
                   {activeIssue.projectKey}-{activeIssue.issueNumber}
                 </div>
               </div>
-              <div className="text-[13px] font-medium text-foreground/90">
+              <div className="text-[13px] font-medium text-[#E8E8ED]">
                 {activeIssue.title}
               </div>
             </div>

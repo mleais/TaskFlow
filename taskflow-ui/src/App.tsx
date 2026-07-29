@@ -5,18 +5,20 @@ import { KanbanBoard } from "@/components/kanban-board";
 import { LoginPage } from "@/components/login-page";
 import { CommandMenu } from "@/components/command-menu";
 import { CreateIssueModal } from "@/components/create-issue-modal";
-import { Zap, LogOut, Kanban } from "lucide-react";
+import { Sidebar } from "@/components/sidebar";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },
 });
 
 function MainApp() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const [cmdOpen, setCmdOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"board" | "list">("board");
 
   const [createIssueOpen, setCreateIssueOpen] = useState(false);
+
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // CMD+K / CTRL+K, 'v' and 'c' shortcuts
   useEffect(() => {
@@ -38,6 +40,11 @@ function MainApp() {
         e.preventDefault();
         setCreateIssueOpen(true);
       }
+
+      if (e.key === "[" && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault();
+        setSidebarOpen(o => !o);
+      }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
@@ -46,72 +53,61 @@ function MainApp() {
   if (!user) return <LoginPage />;
 
   return (
-    <div className="flex flex-col h-screen w-full bg-background text-foreground">
-      {/* Minimalist Linear-style topbar */}
-      <header className="border-b border-border/40 bg-background/80 backdrop-blur-md px-4 h-12 flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-4">
-          {/* Logo */}
-          <div className="flex items-center gap-2 text-foreground">
-            <Zap className="w-4 h-4 text-primary" />
-            <span className="font-semibold text-[13px] tracking-wide">TaskFlow</span>
+    <div className="flex h-screen w-full bg-[#0A0A0B] text-foreground overflow-hidden">
+      {/* Sidebar */}
+      <Sidebar 
+        isOpen={sidebarOpen} 
+        onToggle={() => setSidebarOpen(false)} 
+        onCreateIssue={() => setCreateIssueOpen(true)}
+        activeView={viewMode === "board" ? "board" : "views"}
+      />
+
+      {/* Main Content */}
+      <div className="flex flex-col flex-1 min-w-0">
+        {/* Top Header - Breadcrumb */}
+        <header className="h-12 flex items-center justify-between px-4 border-b border-border/20 shrink-0 bg-[#0A0A0B]">
+          <div className="flex items-center gap-3">
+            {!sidebarOpen && (
+              <button 
+                onClick={() => setSidebarOpen(true)}
+                className="p-1 rounded text-muted-foreground hover:bg-white/5 hover:text-foreground transition-colors"
+                title="Open sidebar ([)"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M14 13V3C14 2.44772 13.5523 2 13 2H3C2.44772 2 2 2.44772 2 3V13C2 13.5523 2.44772 14 3 14H13C13.5523 14 14 13.5523 14 13Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M6 2V14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            )}
+            
+            <div className="flex items-center text-[13px] font-medium text-muted-foreground">
+              <span className="hover:text-foreground cursor-pointer transition-colors">TaskFlow</span>
+              <span className="mx-2 opacity-50">/</span>
+              <span className="hover:text-foreground cursor-pointer transition-colors">Your Team</span>
+              <span className="mx-2 opacity-50">/</span>
+              <span className="text-foreground">{viewMode === "board" ? "Board" : "List"}</span>
+            </div>
           </div>
 
-          <div className="w-[1px] h-4 bg-border/50"></div>
-
-          {/* Nav */}
-          <nav className="flex items-center gap-1">
-            <button 
-              onClick={() => setViewMode("board")}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[13px] font-medium transition-colors ${viewMode === "board" ? "bg-muted text-foreground" : "text-muted-foreground hover:bg-muted/50"}`}
-            >
-              <Kanban className="w-3.5 h-3.5 opacity-70" />
-              Board
-            </button>
-            <button 
-              onClick={() => setViewMode("list")}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[13px] font-medium transition-colors ${viewMode === "list" ? "bg-muted text-foreground" : "text-muted-foreground hover:bg-muted/50"}`}
-            >
-              List
-            </button>
-          </nav>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-2 text-[11px] text-muted-foreground hidden sm:flex">
-             Press <kbd className="font-mono bg-muted/50 px-1 rounded border border-border/50">C</kbd> to create issue
-          </div>
-
-          {/* CMD+K hint */}
-          <button
-            onClick={() => setCmdOpen(true)}
-            className="flex items-center gap-2 px-2 py-1 rounded-md border border-border/40 bg-muted/20 text-[11px] text-muted-foreground hover:bg-muted/40 transition-all"
-          >
-            <span>Search</span>
-            <kbd className="font-mono text-[9px] opacity-70">⌘K</kbd>
-          </button>
-
-          <div className="w-[1px] h-4 bg-border/50"></div>
-
-          {/* User menu */}
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-[10px] font-bold text-primary">
-              {user.fullName[0]}
+            <div className="flex items-center gap-1.5 p-1 rounded-md bg-white/5 border border-white/10 text-[11px] text-muted-foreground">
+              <button onClick={() => setViewMode("board")} className={`px-2 py-0.5 rounded ${viewMode === "board" ? "bg-white/10 text-foreground" : "hover:text-foreground"}`}>Board</button>
+              <button onClick={() => setViewMode("list")} className={`px-2 py-0.5 rounded ${viewMode === "list" ? "bg-white/10 text-foreground" : "hover:text-foreground"}`}>List</button>
             </div>
             <button
-              onClick={logout}
-              className="p-1 rounded-md hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
-              title="Logout"
+              onClick={() => setCmdOpen(true)}
+              className="px-2 py-1.5 rounded-md hover:bg-white/5 transition-colors text-muted-foreground hover:text-foreground flex items-center gap-1.5"
             >
-              <LogOut className="w-3.5 h-3.5" />
+              <span className="text-[12px] font-medium">Display</span>
             </button>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {/* Content */}
-      <main className="flex-1 overflow-hidden">
-        <KanbanBoard viewMode={viewMode} />
-      </main>
+        {/* Board Content */}
+        <main className="flex-1 overflow-hidden relative">
+          <KanbanBoard viewMode={viewMode} />
+        </main>
+      </div>
 
       {/* CMD+K */}
       <CommandMenu 
